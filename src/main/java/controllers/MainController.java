@@ -7,8 +7,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import models.Juego;
 
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +29,8 @@ public class MainController implements Initializable {
     @FXML private TableColumn<Juego, String> colPlataforma;
     @FXML private TableColumn<Juego, String> colGeneros;
 
+    @FXML private ImageView imgPortadaMain; // NUEVO
+
     private JuegoDAO juegoDAO = new JuegoDAO();
 
     @Override
@@ -40,6 +45,26 @@ public class MainController implements Initializable {
         colGeneros.setCellValueFactory(new PropertyValueFactory<>("generos"));
 
         cargarDatosTabla();
+
+        // Escuchar cambios de selección en la tabla
+        tablaJuegos.getSelectionModel().selectedItemProperty().addListener(
+                (obs, juegoAnterior, juegoNuevo) -> mostrarPortada(juegoNuevo)
+        );
+    }
+
+    private void mostrarPortada(Juego juego) {
+        if (juego == null || juego.getRutaPortada() == null || juego.getRutaPortada().isEmpty()) {
+            imgPortadaMain.setImage(null);
+            return;
+        }
+
+        File archivo = new File(juego.getRutaPortada());
+        if (archivo.exists()) {
+            Image imagen = new Image(archivo.toURI().toString());
+            imgPortadaMain.setImage(imagen);
+        } else {
+            imgPortadaMain.setImage(null);
+        }
     }
 
     private void cargarDatosTabla() {
@@ -92,6 +117,7 @@ public class MainController implements Initializable {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             juegoDAO.eliminarJuego(juegoSeleccionado.getId());
             cargarDatosTabla();
+            imgPortadaMain.setImage(null);
         }
     }
 }

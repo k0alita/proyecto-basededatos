@@ -10,11 +10,10 @@
 
 
     <dependencies>
-        <!-- Dependencias de JavaFX -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>21.0.1</version> <!-- Puedes ajustar la versión según tu JDK -->
+            <version>21.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -39,7 +38,6 @@
 
     <build>
         <plugins>
-            <!-- Plugin para ejecutar JavaFX desde Maven -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>

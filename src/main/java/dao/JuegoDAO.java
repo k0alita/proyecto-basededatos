@@ -9,7 +9,7 @@ public class JuegoDAO {
 
     public List<Juego> buscarJuegos(String titulo, String nombrePlataforma) {
         List<Juego> lista = new ArrayList<>();
-        String sql = "SELECT j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, " +
+        String sql = "SELECT j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada, " +
                 "GROUP_CONCAT(DISTINCT p.nombre SEPARATOR ', ') AS plataformas_juego, " +
                 "GROUP_CONCAT(DISTINCT g.nombre SEPARATOR ', ') AS generos_juego " +
                 "FROM juegos j " +
@@ -18,13 +18,12 @@ public class JuegoDAO {
                 "LEFT JOIN juegos_generos jg ON j.id_juego = jg.id_juego " +
                 "LEFT JOIN generos g ON jg.id_genero = g.id_genero " +
                 "WHERE j.titulo LIKE ? " +
-                "GROUP BY j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento";
+                "GROUP BY j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada";
 
         try (Connection conexion = ConexionDB.getConnection();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
 
             ps.setString(1, "%" + (titulo != null ? titulo : "") + "%");
-            // Filtro avanzado por plataforma: Si eliges "PC", el HAVING filtra que el group_concat contenga "PC"
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -34,7 +33,6 @@ public class JuegoDAO {
                     if (plataformas == null) plataformas = "Sin plataforma";
                     if (generos == null) generos = "Sin género";
 
-                    // Filtrado extra en Java si hay una plataforma seleccionada (más fácil que complicar el SQL)
                     if (nombrePlataforma != null && !plataformas.contains(nombrePlataforma)) {
                         continue;
                     }
@@ -45,7 +43,8 @@ public class JuegoDAO {
                             rs.getString("desarrolladora"),
                             rs.getInt("anio_lanzamiento"),
                             plataformas,
-                            generos
+                            generos,
+                            rs.getString("ruta_portada") // NUEVO
                     );
                     lista.add(juego);
                 }
@@ -57,7 +56,7 @@ public class JuegoDAO {
     }
 
     public boolean insertarJuegoConTransaccion(Juego juego, List<Integer> idsPlataformas, List<Integer> idsGeneros) {
-        String sqlJuego = "INSERT INTO juegos (titulo, desarrolladora, anio_lanzamiento) VALUES (?, ?, ?)";
+        String sqlJuego = "INSERT INTO juegos (titulo, desarrolladora, anio_lanzamiento, ruta_portada) VALUES (?, ?, ?, ?)";
         String sqlPlataforma = "INSERT INTO juegos_plataformas (id_juego, id_plataforma) VALUES (?, ?)";
         String sqlGenero = "INSERT INTO juegos_generos (id_juego, id_genero) VALUES (?, ?)";
 
@@ -70,13 +69,13 @@ public class JuegoDAO {
                 psJuego.setString(1, juego.getTitulo());
                 psJuego.setString(2, juego.getDesarrolladora());
                 psJuego.setInt(3, juego.getAnioLanzamiento());
+                psJuego.setString(4, juego.getRutaPortada()); // NUEVO
                 psJuego.executeUpdate();
 
                 try (ResultSet rs = psJuego.getGeneratedKeys()) {
                     if (rs.next()) {
                         int idJuego = rs.getInt(1);
 
-                        // Insertar todas las plataformas seleccionadas
                         try (PreparedStatement psPlat = conexion.prepareStatement(sqlPlataforma)) {
                             for (int idPlat : idsPlataformas) {
                                 psPlat.setInt(1, idJuego);
@@ -85,7 +84,6 @@ public class JuegoDAO {
                             }
                         }
 
-                        // Insertar todos los géneros seleccionados
                         try (PreparedStatement psGen = conexion.prepareStatement(sqlGenero)) {
                             for (int idGen : idsGeneros) {
                                 psGen.setInt(1, idJuego);

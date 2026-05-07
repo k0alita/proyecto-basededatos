@@ -4,10 +4,17 @@ import dao.JuegoDAO;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Juego;
 
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -19,24 +26,66 @@ public class FormController implements Initializable {
     @FXML private ListView<String> listPlataformas;
     @FXML private ListView<String> listGeneros;
     @FXML private Button btnGuardar;
+    @FXML private Label  lblRutaImagen;
+    @FXML private ImageView imgPortadaPreview;  // NUEVO
 
     private JuegoDAO juegoDAO = new JuegoDAO();
+    private String rutaPortadaSeleccionada = null;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        listPlataformas.getItems().addAll("1 | PC ", "2 | PlayStation 5", "3 | Nintendo Switch", "4 | Xbox Series X");
+        listPlataformas.getItems().addAll("1 | PC", "2 | PlayStation 5", "3 | Nintendo Switch", "4 | Xbox Series X");
         listGeneros.getItems().addAll("1 | RPG", "2 | Shooter", "3 | Aventura", "4 | Supervivencia");
 
-        // Permitir selección múltiple manteniendo pulsado CTRL
         listPlataformas.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listGeneros.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     @FXML
+    private void seleccionarImagen() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Seleccionar portada");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg")
+        );
+
+        Stage stage = (Stage) btnGuardar.getScene().getWindow();
+        File archivoSeleccionado = fileChooser.showOpenDialog(stage);
+
+        if (archivoSeleccionado != null) {
+            try {
+                Path carpetaDestino = Path.of("portadas");
+                if (!Files.exists(carpetaDestino)) {
+                    Files.createDirectories(carpetaDestino);
+                }
+
+                String nombreArchivo = archivoSeleccionado.getName();
+                Path destino = carpetaDestino.resolve(nombreArchivo);
+
+                Files.copy(archivoSeleccionado.toPath(), destino, StandardCopyOption.REPLACE_EXISTING);
+
+                rutaPortadaSeleccionada = "portadas/" + nombreArchivo;
+                lblRutaImagen.setText(nombreArchivo);
+
+                // Cargar la imagen en el ImageView (miniatura)
+                File archivoCopiado = destino.toFile();
+                Image img = new Image(archivoCopiado.toURI().toString());
+                imgPortadaPreview.setImage(img);
+
+            } catch (Exception e) {
+                mostrarAlerta("Error imagen", "No se pudo copiar o cargar la imagen de portada.");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @FXML
     private void guardar() {
         try {
-            if (txtTitulo.getText().isEmpty() || listPlataformas.getSelectionModel().getSelectedItems().isEmpty() || listGeneros.getSelectionModel().getSelectedItems().isEmpty()) {
-                mostrarAlerta("Error", "Debe tener un titulo, plataforma y genero como minimo");
+            if ( txtTitulo.getText().isEmpty()
+                    || listPlataformas.getSelectionModel().getSelectedItems().isEmpty()
+                    || listGeneros.getSelectionModel().getSelectedItems().isEmpty() ) {
+                mostrarAlerta("Error", "Debe tener título, al menos una plataforma y un género.");
                 return;
             }
 
@@ -44,11 +93,10 @@ public class FormController implements Initializable {
             String desarrolladora = txtDesarrolladora.getText();
             int anio = txtAnio.getText().isEmpty() ? 0 : Integer.parseInt(txtAnio.getText());
 
-            // Extraer las IDs seleccionadas
             List<Integer> idsPlataformas = extraerIds(listPlataformas.getSelectionModel().getSelectedItems());
             List<Integer> idsGeneros = extraerIds(listGeneros.getSelectionModel().getSelectedItems());
 
-            Juego nuevoJuego = new Juego(0, titulo, desarrolladora, anio, "", "");
+            Juego nuevoJuego = new Juego(0, titulo, desarrolladora, anio, "", "", rutaPortadaSeleccionada);
 
             boolean exito = juegoDAO.insertarJuegoConTransaccion(nuevoJuego, idsPlataformas, idsGeneros);
 
@@ -56,12 +104,15 @@ public class FormController implements Initializable {
             else mostrarAlerta("Error SQL", "Ocurrió un problema. Rollback ejecutado.");
 
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error", "El año debe ser un numero.");
+            mostrarAlerta("Error", "El año debe ser un número.");
         }
     }
 
     @FXML private void cancelar() { cerrarVentana(); }
-    private void cerrarVentana() { ((Stage) btnGuardar.getScene().getWindow()).close(); }
+
+    private void cerrarVentana() {
+        ((Stage) btnGuardar.getScene().getWindow()).close();
+    }
 
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -74,10 +125,8 @@ public class FormController implements Initializable {
     private List<Integer> extraerIds(List<String> selecciones) {
         List<Integer> ids = new ArrayList<>();
         for (String s : selecciones) {
-            if (s.contains("1")) ids.add(1);
-            else if (s.contains("2")) ids.add(2);
-            else if (s.contains("3")) ids.add(3);
-            else if (s.contains("4")) ids.add(4);
+            String idStr = s.split("\\|")[0].trim(); // "1 | PC" -> "1"
+            ids.add(Integer.parseInt(idStr));
         }
         return ids;
     }

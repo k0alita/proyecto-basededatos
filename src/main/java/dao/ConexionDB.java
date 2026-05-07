@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionDB {
-    private static final String URL = "jdbc:mariadb://localhost:3306/robuxgames";
+    private static final String URL = "jdbc:mariadb://localhost:3306/robuxgames2";
     private static final String USER = "root";
-    private static final String PASS = "root"; // Asegúrate de que este es tu password real de MariaDB
+    private static final String PASS = "root";
 
     public static Connection getConnection() throws SQLException {
         try {
