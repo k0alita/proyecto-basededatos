@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?><?import javafx.scene.control.Label?><?import javafx.scene.layout.GridPane?><?import javafx.scene.layout.ColumnConstraints?><?import javafx.geometry.Insets?><?import javafx.scene.control.TextField?><?import javafx.scene.control.ComboBox?><?import javafx.scene.layout.HBox?><?import javafx.scene.control.CheckBox?><?import javafx.scene.control.Button?>
+
+
+<?import javafx.scene.control.ListView?>
+<VBox stylesheets="@style.css" styleClass="root-pane" spacing="20" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.FormController">
+    <padding><Insets top="20" right="30" bottom="20" left="30"/></padding>
+
+    <Label fx:id="lblTituloFormulario" text="Añadir Nuevo Juego" styleClass="title-label"/>
+
+    <GridPane vgap="15" hgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Título:" styleClass="text-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtTitulo" promptText="Ej: RNG Slime" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Desarrollo:" styleClass="text-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtDesarrolladora" promptText="Ej: KoalaStudios" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Año:" styleClass="text-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtAnio" promptText="Ej: 2026" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Plataformas:" styleClass="text-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <ListView fx:id="listPlataformas" prefHeight="120" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Géneros:" styleClass="text-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <ListView fx:id="listGeneros" prefHeight="120" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button text="Cancelar" onAction="#cancelar" styleClass="btn-secondary"/>
+        <Button fx:id="btnGuardar" text="Guardar Juego" onAction="#guardar" styleClass="btn-success"/>
+    </HBox>
+
+</VBox>

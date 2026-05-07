@@ -1,0 +1,156 @@
+.root-pane {
+    -fx-background-color: #1e1e2e;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #cdd6f4;
+}
+
+.text-label {
+    -fx-text-fill: #a6adc8;
+    -fx-font-size: 14px;
+}
+
+/* Estilos de los TextFields y ComboBox */
+.text-field, .combo-box {
+    -fx-background-color: #313244;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #6c7086;
+    -fx-background-radius: 5px;
+    -fx-border-color: #45475a;
+    -fx-border-radius: 5px;
+    -fx-padding: 5px 10px;
+}
+
+/* =========================================
+   ESTILOS DEL LISTVIEW (Plataformas y Géneros)
+   ========================================= */
+.list-view {
+    -fx-background-color: #313244;
+    -fx-background-radius: 5px;
+    -fx-border-color: #45475a;
+    -fx-border-radius: 5px;
+    -fx-padding: 2px;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cdd6f4;
+    -fx-font-size: 13px;
+    -fx-padding: 6px 10px;
+}
+
+.list-cell:hover {
+    -fx-background-color: #45475a;
+}
+
+.list-view:focused .list-cell:selected,
+.list-cell:selected {
+    -fx-background-color: #89b4fa;
+    -fx-text-fill: #11111b;
+    -fx-font-weight: bold;
+    -fx-background-radius: 3px;
+}
+
+/* =========================================
+   ESTILO DE LA BARRA DE DESPLAZAMIENTO (Scrollbar)
+   ========================================= */
+.list-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10px;
+}
+
+.list-view .scroll-bar:vertical .track {
+    -fx-background-color: #1e1e2e;
+    -fx-border-color: transparent;
+    -fx-background-radius: 5px;
+}
+
+.list-view .scroll-bar:vertical .thumb {
+    -fx-background-color: #585b70;
+    -fx-background-radius: 5px;
+}
+
+.list-view .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #6c7086;
+}
+
+.list-view .scroll-bar:vertical .increment-button,
+.list-view .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.list-view .scroll-bar:vertical .increment-arrow,
+.list-view .scroll-bar:vertical .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/* Estilo general de botones */
+.button {
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+    -fx-padding: 8px 15px;
+}
+
+.btn-primary { -fx-background-color: #89b4fa; -fx-text-fill: #11111b; }
+.btn-secondary { -fx-background-color: #6c7086; }
+.btn-success { -fx-background-color: #a6e3a1; -fx-text-fill: #11111b; }
+.btn-warning { -fx-background-color: #f9e2af; -fx-text-fill: #11111b; }
+.btn-danger { -fx-background-color: #f38ba8; -fx-text-fill: #11111b; }
+
+.button:hover {
+    -fx-opacity: 0.8;
+}
+
+/* Estilo del TableView */
+.table-view {
+    -fx-background-color: #1e1e2e;
+    -fx-border-color: #313244;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #313244;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-size: 40px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #cdd6f4;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+/* Fondos de las filas */
+.table-row-cell {
+    -fx-background-color: #1e1e2e;
+}
+.table-row-cell:odd {
+    -fx-background-color: #181825;
+}
+
+/* AQUÍ ESTÁ EL TRUCO PARA EL TEXTO: Apuntar directo a .table-cell */
+.table-view .table-cell {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER-LEFT;
+}
+
+/* Color cuando seleccionas una fila completa */
+.table-row-cell:selected {
+    -fx-background-color: #89b4fa;
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: #11111b;
+    -fx-font-weight: bold;
+}

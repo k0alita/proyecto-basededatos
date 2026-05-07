@@ -22,12 +22,13 @@
             <version>21.0.1</version>
         </dependency>
 
-        <!-- Driver de MySQL/MariaDB (Ajusta según la BD que uses) -->
+        <!-- Source: https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>8.3.0</version>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.3.3</version>
         </dependency>
+
     </dependencies>
 
     <properties>
@@ -44,7 +45,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>es.tuproyecto.Main</mainClass>
+                    <mainClass>Main</mainClass> <!-- O controllers.Main -->
                 </configuration>
             </plugin>
         </plugins>
