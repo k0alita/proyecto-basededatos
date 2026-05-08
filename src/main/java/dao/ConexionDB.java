@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionDB {
-    private static final String URL = "jdbc:mariadb://localhost:3306/robuxgames2";
-    private static final String USER = "root";
-    private static final String PASS = "root";
+    private static final String URL = "jdbc:mariadb://34.163.161.32:3306/robuxgames2";
+    private static final String USER = "robux_user";
+    private static final String PASS = "Bermudo123";
 
     public static Connection getConnection() throws SQLException {
         try {
