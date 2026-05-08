@@ -122,6 +122,14 @@ public class FormController implements Initializable {
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
+
+        // Aplicar tu CSS oscuro al dialog
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(
+                getClass().getResource("/style.css").toExternalForm()
+        );
+        dialogPane.getStyleClass().add("custom-alert");
+
         alert.showAndWait();
     }
 

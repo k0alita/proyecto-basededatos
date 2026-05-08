@@ -8,13 +8,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // Cargar el FXML de la ventana principal
         Parent root = FXMLLoader.load(getClass().getResource("/MainView.fxml"));
 
         primaryStage.setTitle("RobloxGames - Gestor de Videojuegos de Roblox");
-        primaryStage.setScene(new Scene(root, 900, 600));
+        Scene scene = new Scene(root, 1400, 800);
 
-        // Centrar en pantalla y mostrar
+        // Quitar barra de título del sistema
+        primaryStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+
+        primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
         primaryStage.show();
     }

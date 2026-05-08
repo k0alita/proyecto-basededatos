@@ -14,7 +14,7 @@
     -fx-font-size: 14px;
 }
 
-/* Estilos de los TextFields y ComboBox */
+/* TextField y ComboBox */
 .text-field, .combo-box {
     -fx-background-color: #313244;
     -fx-text-fill: #ffffff;
@@ -25,9 +25,7 @@
     -fx-padding: 5px 10px;
 }
 
-/* =========================================
-   ESTILOS DEL LISTVIEW (Plataformas y Géneros)
-   ========================================= */
+/* ListView (plataformas y géneros) */
 .list-view {
     -fx-background-color: #313244;
     -fx-background-radius: 5px;
@@ -55,9 +53,7 @@
     -fx-background-radius: 3px;
 }
 
-/* =========================================
-   ESTILO DE LA BARRA DE DESPLAZAMIENTO (Scrollbar)
-   ========================================= */
+/* Scrollbar del ListView */
 .list-view .scroll-bar:vertical {
     -fx-background-color: transparent;
     -fx-pref-width: 10px;
@@ -90,7 +86,7 @@
     -fx-padding: 0;
 }
 
-/* Estilo general de botones */
+/* Botones generales */
 .button {
     -fx-font-weight: bold;
     -fx-text-fill: white;
@@ -99,17 +95,17 @@
     -fx-padding: 8px 15px;
 }
 
-.btn-primary { -fx-background-color: #89b4fa; -fx-text-fill: #11111b; }
-.btn-secondary { -fx-background-color: #6c7086; }
-.btn-success { -fx-background-color: #a6e3a1; -fx-text-fill: #11111b; }
-.btn-warning { -fx-background-color: #f9e2af; -fx-text-fill: #11111b; }
-.btn-danger { -fx-background-color: #f38ba8; -fx-text-fill: #11111b; }
+.btn-primary  { -fx-background-color: #89b4fa; -fx-text-fill: #11111b; }
+.btn-secondary{ -fx-background-color: #6c7086; }
+.btn-success  { -fx-background-color: #a6e3a1; -fx-text-fill: #11111b; }
+.btn-warning  { -fx-background-color: #f9e2af; -fx-text-fill: #11111b; }
+.btn-danger   { -fx-background-color: #f38ba8; -fx-text-fill: #11111b; }
 
 .button:hover {
     -fx-opacity: 0.8;
 }
 
-/* Estilo del TableView */
+/* TableView */
 .table-view {
     -fx-background-color: #1e1e2e;
     -fx-border-color: #313244;
@@ -127,25 +123,25 @@
 .table-view .column-header .label {
     -fx-text-fill: #cdd6f4;
     -fx-font-weight: bold;
-    -fx-font-size: 14px;
+    -fx-font-size: 16px;
 }
 
-/* Fondos de las filas */
+/* Filas */
 .table-row-cell {
     -fx-background-color: #1e1e2e;
+    -fx-cell-size: 28px;
 }
 .table-row-cell:odd {
     -fx-background-color: #181825;
 }
 
-/* AQUÍ ESTÁ EL TRUCO PARA EL TEXTO: Apuntar directo a .table-cell */
 .table-view .table-cell {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 14px;
+    -fx-font-size: 15px;
     -fx-alignment: CENTER-LEFT;
+    -fx-padding: 6 8 6 8;
 }
 
-/* Color cuando seleccionas una fila completa */
 .table-row-cell:selected {
     -fx-background-color: #89b4fa;
 }
@@ -153,4 +149,86 @@
 .table-row-cell:selected .table-cell {
     -fx-text-fill: #11111b;
     -fx-font-weight: bold;
+}
+
+/* ============================
+   ALERTAS PERSONALIZADAS
+   ============================ */
+
+/* DialogPane con clase .custom-alert (se la pones en el controlador) */
+.custom-alert {
+    -fx-background-color: #1e1e2e;
+    -fx-padding: 15;
+}
+
+/* Texto del contenido y cabecera */
+.custom-alert .label {
+    -fx-text-fill: #cdd6f4;
+    -fx-font-size: 13px;
+}
+
+/* Área del contenido (donde va el mensaje) */
+.custom-alert .content {
+    -fx-padding: 10 0 0 0;
+}
+
+/* Botonera del diálogo */
+.custom-alert .button-bar .button {
+    -fx-background-radius: 5px;
+    -fx-font-weight: bold;
+}
+
+/* Botón OK / Aceptar */
+.custom-alert .button:default,
+.custom-alert .button.ok-button {
+    -fx-background-color: #89b4fa;
+    -fx-text-fill: #11111b;
+}
+
+/* Botón Cancelar */
+.custom-alert .button.cancel-button {
+    -fx-background-color: #6c7086;
+    -fx-text-fill: #cdd6f4;
+}
+
+/* Icono del diálogo (zona de X roja o ?) */
+.custom-alert .graphic-container {
+    -fx-padding: 10;
+}
+
+/* Cabecera del diálogo */
+.custom-alert .header-panel {
+    -fx-background-color: #181825;
+    -fx-border-color: #313244;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Quitar borde gris por defecto del Alert */
+.custom-alert > *.border-pane {
+    -fx-border-color: transparent;
+}
+
+/* Barra de título personalizada */
+.title-bar {
+    -fx-background-color: #181825;
+    -fx-border-color: #313244;
+    -fx-border-width: 0 0 1 0;
+}
+
+.btn-titlebar, .btn-titlebar-cerrar {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cdd6f4;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 4px;
+}
+
+.btn-titlebar:hover {
+    -fx-background-color: #313244;
+}
+
+.btn-titlebar-cerrar:hover {
+    -fx-background-color: #f38ba8;
+    -fx-text-fill: #11111b;
 }
