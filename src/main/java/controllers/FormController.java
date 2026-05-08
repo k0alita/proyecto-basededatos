@@ -39,6 +39,9 @@ public class FormController implements Initializable {
 
         listPlataformas.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listGeneros.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        Image defaultImg = new Image(getClass().getResourceAsStream("/portadas/sin_portada.jpg"));
+        imgPortadaPreview.setImage(defaultImg);
     }
 
     @FXML
@@ -46,7 +49,7 @@ public class FormController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Seleccionar portada");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg")
+                new FileChooser.ExtensionFilter("Imágenes PNG y JPG", "*.png", "*.jpg", "*.jpeg")
         );
 
         Stage stage = (Stage) btnGuardar.getScene().getWindow();

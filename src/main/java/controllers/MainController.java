@@ -53,18 +53,30 @@ public class MainController implements Initializable {
     }
 
     private void mostrarPortada(Juego juego) {
-        if (juego == null || juego.getRutaPortada() == null || juego.getRutaPortada().isEmpty()) {
-            imgPortadaMain.setImage(null);
+        if (juego == null) {
+            imgPortadaMain.setImage(getImagenPorDefecto());
             return;
         }
 
-        File archivo = new File(juego.getRutaPortada());
+        String ruta = juego.getRutaPortada();
+
+        if (ruta == null || ruta.isEmpty()) {
+            imgPortadaMain.setImage(getImagenPorDefecto());
+            return;
+        }
+
+        File archivo = new File(ruta);
         if (archivo.exists()) {
             Image imagen = new Image(archivo.toURI().toString());
             imgPortadaMain.setImage(imagen);
         } else {
-            imgPortadaMain.setImage(null);
+            imgPortadaMain.setImage(getImagenPorDefecto());
         }
+    }
+
+    private Image getImagenPorDefecto() {
+        // Intenta cargar /portadas/sin_portada.png desde resources
+        return new Image(getClass().getResourceAsStream("/portadas/sin_portada.jpg"));
     }
 
     private void cargarDatosTabla() {
