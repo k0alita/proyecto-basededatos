@@ -14,9 +14,6 @@ import models.Plataforma;
 import utils.ImgBBUploader;
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -25,7 +22,6 @@ public class FormController implements Initializable {
     @FXML private TextField txtTitulo;
     @FXML private TextField txtDesarrolladora;
     @FXML private TextField txtAnio;
-
     // Ahora usan Objetos Reales, no Strings
     @FXML private ListView<Plataforma> listPlataformas;
     @FXML private ListView<Genero> listGeneros;
