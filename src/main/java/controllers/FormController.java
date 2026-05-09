@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import models.Juego;
 import models.Genero;
 import models.Plataforma;
-
+import utils.ImgBBUploader;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
@@ -90,6 +90,9 @@ public class FormController implements Initializable {
         }
     }
 
+    // Añade esta variable arriba con las demás
+    private File archivoFisicoSeleccionado = null;
+
     @FXML
     private void seleccionarImagen() {
         FileChooser fileChooser = new FileChooser();
@@ -99,51 +102,52 @@ public class FormController implements Initializable {
         );
 
         Stage stage = (Stage) btnGuardar.getScene().getWindow();
-        File archivoSeleccionado = fileChooser.showOpenDialog(stage);
+        archivoFisicoSeleccionado = fileChooser.showOpenDialog(stage);
 
-        if (archivoSeleccionado != null) {
-            try {
-                Path carpetaDestino = Path.of("portadas");
-                if (!Files.exists(carpetaDestino)) Files.createDirectories(carpetaDestino);
-
-                String nombreArchivo = archivoSeleccionado.getName();
-                Path destino = carpetaDestino.resolve(nombreArchivo);
-                Files.copy(archivoSeleccionado.toPath(), destino, StandardCopyOption.REPLACE_EXISTING);
-
-                rutaPortadaSeleccionada = "portadas/" + nombreArchivo;
-                lblRutaImagen.setText(nombreArchivo);
-                imgPortadaPreview.setImage(new Image(destino.toFile().toURI().toString()));
-
-            } catch (Exception e) {
-                mostrarAlerta("Error imagen", "No se pudo cargar la imagen.");
-            }
+        if (archivoFisicoSeleccionado != null) {
+            // Solo mostramos la miniatura localmente, aún no la hemos subido
+            lblRutaImagen.setText(archivoFisicoSeleccionado.getName());
+            imgPortadaPreview.setImage(new Image(archivoFisicoSeleccionado.toURI().toString()));
         }
     }
 
     @FXML
     private void guardar() {
         try {
-            if (txtTitulo.getText().isEmpty()
-                    || listPlataformas.getSelectionModel().getSelectedItems().isEmpty()
+            if (txtTitulo.getText().isEmpty() || listPlataformas.getSelectionModel().getSelectedItems().isEmpty()
                     || listGeneros.getSelectionModel().getSelectedItems().isEmpty()) {
                 mostrarAlerta("Error", "Debe tener título, al menos una plataforma y un género.");
                 return;
+            }
+
+            // Cambiamos el texto del botón para que el usuario sepa que está cargando
+            btnGuardar.setText("Subiendo...");
+            btnGuardar.setDisable(true);
+
+            // Si hay un archivo nuevo seleccionado, lo subimos a internet!
+            if (archivoFisicoSeleccionado != null) {
+                try {
+                    String urlNube = ImgBBUploader.subirImagen(archivoFisicoSeleccionado);
+                    if (urlNube != null) {
+                        rutaPortadaSeleccionada = urlNube; // EJ: https://i.ibb.co/123/slime.png
+                    }
+                } catch (Exception e) {
+                    mostrarAlerta("Error", "No se pudo subir la imagen a internet.");
+                    btnGuardar.setText("Guardar");
+                    btnGuardar.setDisable(false);
+                    return;
+                }
             }
 
             String titulo = txtTitulo.getText();
             String desarrolladora = txtDesarrolladora.getText();
             int anio = txtAnio.getText().isEmpty() ? 0 : Integer.parseInt(txtAnio.getText());
 
-            // Ya no hace falta el String.split("\\|"), sacamos el ID directo del objeto
             List<Integer> idsPlataformas = new ArrayList<>();
-            for (Plataforma p : listPlataformas.getSelectionModel().getSelectedItems()) {
-                idsPlataformas.add(p.getId());
-            }
+            for (Plataforma p : listPlataformas.getSelectionModel().getSelectedItems()) idsPlataformas.add(p.getId());
 
             List<Integer> idsGeneros = new ArrayList<>();
-            for (Genero g : listGeneros.getSelectionModel().getSelectedItems()) {
-                idsGeneros.add(g.getId());
-            }
+            for (Genero g : listGeneros.getSelectionModel().getSelectedItems()) idsGeneros.add(g.getId());
 
             boolean exito;
             if (modoEdicion) {
@@ -162,9 +166,10 @@ public class FormController implements Initializable {
 
         } catch (NumberFormatException e) {
             mostrarAlerta("Error", "El año debe ser un número válido.");
+            btnGuardar.setText("Guardar");
+            btnGuardar.setDisable(false);
         }
     }
-
     @FXML private void cancelar() { cerrarVentana(); }
     private void cerrarVentana() { ((Stage) btnGuardar.getScene().getWindow()).close(); }
 
