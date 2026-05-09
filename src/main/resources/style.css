@@ -163,7 +163,8 @@
 
 .table-row-cell {
     -fx-background-color: transparent;
-    -fx-cell-size: 72px;
+    -fx-min-height: 72px;
+    -fx-pref-height: 72px;
     -fx-border-color: transparent transparent #1e1e2e transparent;
     -fx-border-width: 1px;
 }
