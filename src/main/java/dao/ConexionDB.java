@@ -1,21 +1,34 @@
 package dao;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class ConexionDB {
-    private static final String URL = "jdbc:mariadb://34.163.161.32:3306/robuxgames2";
-    private static final String USER = "robux_user";
-    private static final String PASS = "Bermudo123";
+    private static final Properties properties = new Properties();
 
-    public static Connection getConnection() throws SQLException {
-        try {
+    // Este bloque static se ejecuta una sola vez al arrancar la app
+    static {
+        try (InputStream input = ConexionDB.class.getClassLoader().getResourceAsStream("config.properties")) {
+            if (input == null) {
+                System.err.println("Error: No se encontró el archivo config.properties en resources.");
+            } else {
+                properties.load(input);
+            }
             Class.forName("org.mariadb.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            System.err.println("Error: Driver de MariaDB no encontrado.");
+        } catch (Exception e) {
+            System.err.println("Error al cargar la configuración de la base de datos.");
             e.printStackTrace();
         }
-        return DriverManager.getConnection(URL, USER, PASS);
+    }
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(
+                properties.getProperty("db.url"),
+                properties.getProperty("db.user"),
+                properties.getProperty("db.password")
+        );
     }
 }

@@ -4,22 +4,28 @@ import dao.JuegoDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import models.Juego;
-
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
+import javafx.scene.control.TableRow;
 
 public class MainController implements Initializable {
 
@@ -48,13 +54,35 @@ public class MainController implements Initializable {
     private double yOffset;
 
     private final JuegoDAO juegoDAO = new JuegoDAO();
+    // Temporizador de 300 milisegundos para mas fluidez
+    private PauseTransition pauseBusqueda = new PauseTransition(Duration.millis(300));
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        comboBuscarPlataforma.getItems().addAll(
-                "PC", "PlayStation 5", "Nintendo Switch", "Xbox Series X"
-        );
+        // Limpiamos y cargamos desde BD
+        comboBuscarPlataforma.getItems().clear();
+        comboBuscarPlataforma.getItems().add("Todas"); // Añadimos la opción por defecto
+
+        List<models.Plataforma> plataformasBD = juegoDAO.obtenerPlataformas();
+        for (models.Plataforma p : plataformasBD) {
+            comboBuscarPlataforma.getItems().add(p.getNombre());
+        }
+        // 1. Qué pasa cuando el temporizador termina: hace la búsqueda
+        pauseBusqueda.setOnFinished(event -> cargarDatosTabla());
+
+// 2. Listener del texto: en vez de buscar de golpe, reinicia el temporizador
+        txtBuscarTitulo.textProperty().addListener((observable, oldValue, newValue) -> {
+            pauseBusqueda.playFromStart();
+        });
+
+// El ComboBox no necesita retraso, porque es un solo clic
+        comboBuscarPlataforma.valueProperty().addListener((observable, oldValue, newValue) -> {
+            cargarDatosTabla();
+        });
+        // Seleccionamos "Todas" por defecto
+        comboBuscarPlataforma.getSelectionModel().selectFirst();
 
         // Columnas visibles en la tabla
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -128,6 +156,17 @@ public class MainController implements Initializable {
                     mostrarDetalle(nuevo);
                 }
         );
+        // Listener para doble clic en la tabla
+        tablaJuegos.setRowFactory(tv -> {
+            TableRow<Juego> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                // Si hacen doble clic y la fila no está vacía
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    abrirFormularioEdicion();
+                }
+            });
+            return row;
+        });
     }
 
     // ---- LÓGICA DE INTERFAZ ----
@@ -182,23 +221,14 @@ public class MainController implements Initializable {
         String titulo = txtBuscarTitulo.getText();
         String plataforma = comboBuscarPlataforma.getValue();
 
+        // Si seleccionan "Todas" o está vacío, le pasamos null al DAO para que no filtre por plataforma
+        if (plataforma != null && plataforma.equals("Todas")) {
+            plataforma = null;
+        }
+
         List<Juego> resultados = juegoDAO.buscarJuegos(titulo, plataforma);
         ObservableList<Juego> listaObservable = FXCollections.observableArrayList(resultados);
         tablaJuegos.setItems(listaObservable);
-    }
-
-    // ---- ACCIONES DE BÚSQUEDA ----
-
-    @FXML
-    private void filtrarJuegos() {
-        cargarDatosTabla();
-    }
-
-    @FXML
-    private void limpiarFiltros() {
-        txtBuscarTitulo.clear();
-        comboBuscarPlataforma.setValue(null);
-        cargarDatosTabla();
     }
 
     // ---- FORMULARIO ALTA ----
@@ -273,6 +303,16 @@ public class MainController implements Initializable {
         Optional<ButtonType> resultado = confirm.showAndWait();
         if (resultado.isPresent() && resultado.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
 
+            // --- NUEVO: Borrar imagen física de la carpeta ---
+            String rutaFoto = seleccionado.getRutaPortada();
+            if (rutaFoto != null && !rutaFoto.isBlank()) {
+                File archivoFoto = new File(rutaFoto);
+                if (archivoFoto.exists() && archivoFoto.isFile()) {
+                    archivoFoto.delete(); // Elimina la imagen del disco
+                }
+            }
+            // ------------------------------------------------
+
             // Borrado en BD usando JuegoDAO
             juegoDAO.eliminarJuego(seleccionado.getId());
 
@@ -346,6 +386,45 @@ public class MainController implements Initializable {
         Button btCancel = (Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL);
         if (btCancel != null) {
             btCancel.getStyleClass().add("btn-secondary");
+        }
+    }
+    @FXML
+    private void abrirFormularioEdicion() {
+        Juego seleccionado = tablaJuegos.getSelectionModel().getSelectedItem();
+
+        if (seleccionado == null) {
+            Alert alerta = crearAlert(
+                    Alert.AlertType.ERROR,
+                    "Editar juego",
+                    "Debes seleccionar un juego de la tabla para poder editarlo."
+            );
+            alerta.showAndWait();
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FormView.fxml"));
+            Parent root = loader.load();
+
+            FormController controller = loader.getController();
+            controller.setJuegoEditar(seleccionado);
+
+            Stage stage = new Stage();
+            stage.setTitle("Editar juego");
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            Scene scene = new Scene(root, 450, 520);
+            scene.getStylesheets().add(
+                    getClass().getResource("/style.css").toExternalForm()
+            );
+
+            stage.setScene(scene);
+            stage.showAndWait();
+
+            cargarDatosTabla();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

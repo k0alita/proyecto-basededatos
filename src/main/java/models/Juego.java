@@ -27,4 +27,32 @@ public class Juego {
     public String getPlataformas() { return plataformas; }
     public String getGeneros() { return generos; }
     public String getRutaPortada() { return rutaPortada; }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public void setDesarrolladora(String desarrolladora) {
+        this.desarrolladora = desarrolladora;
+    }
+
+    public void setAnioLanzamiento(int anioLanzamiento) {
+        this.anioLanzamiento = anioLanzamiento;
+    }
+
+    public void setPlataformas(String plataformas) {
+        this.plataformas = plataformas;
+    }
+
+    public void setGeneros(String generos) {
+        this.generos = generos;
+    }
+
+    public void setRutaPortada(String rutaPortada) {
+        this.rutaPortada = rutaPortada;
+    }
 }
