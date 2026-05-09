@@ -50,7 +50,7 @@
                 </HBox>
             </HBox>
 
-            <!-- Buscador y Editar (Todo en la misma línea) -->
+            <!-- Buscador y botón Editar -->
             <HBox spacing="10" alignment="CENTER_LEFT" styleClass="header-section-inner">
                 <padding>
                     <Insets top="10" right="20" bottom="10" left="20"/>
@@ -63,9 +63,8 @@
                 <!-- Botón Editar al lado de los campos de búsqueda -->
                 <Button text="Editar Juego" onAction="#abrirFormularioEdicion" styleClass="btn-primary"/>
 
-                <!-- Este Region empuja Filtrar y Limpiar hacia la derecha -->
+                <!-- Region expansible para empujar contenido si lo hubiera a la derecha -->
                 <Region HBox.hgrow="ALWAYS"/>
-
             </HBox>
         </VBox>
     </top>
@@ -110,7 +109,7 @@
         </HBox>
     </center>
 
-    <!-- BOTTOM: Botones -->
+    <!-- BOTTOM: Botones de Acción (Añadir y Eliminar) -->
     <bottom>
         <HBox spacing="15" alignment="CENTER_RIGHT" styleClass="footer-section">
             <padding>
