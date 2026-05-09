@@ -22,7 +22,7 @@
     <top>
         <VBox spacing="10" styleClass="header-section">
             <padding>
-                <Insets top="0" right="0" bottom="15" left="0"/>
+                <Insets top="0" right="0" bottom="0" left="0"/>
             </padding>
 
             <!-- Barra de título personalizada -->
@@ -77,10 +77,10 @@
             </padding>
 
             <!-- Tabla de juegos (ocupa la mayor parte del ancho) -->
-            <TableView fx:id="tablaJuegos" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+            <TableView fx:id="tablaJuegos" fixedCellSize="72" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="colId" text="ID" prefWidth="45"/>
-                    <TableColumn fx:id="colPortada" text="Portada" prefWidth="60"/>
+                    <TableColumn fx:id="colPortada" text="" prefWidth="72"/>
                     <TableColumn fx:id="colTitulo" text="Título" prefWidth="360"/>
                     <TableColumn fx:id="colDesarrolladora" text="Desarrolladora" prefWidth="260"/>
                     <TableColumn fx:id="colAnio" text="Año" prefWidth="70"/>
@@ -91,8 +91,7 @@
             </TableView>
 
             <!-- Ficha del juego seleccionado -->
-            <VBox fx:id="panelDetalle" spacing="10" prefWidth="260" maxWidth="260">
-                <Label text="Detalles del juego" styleClass="text-label"/>
+            <VBox fx:id="panelDetalle" styleClass="panel-detalle" spacing="10" prefWidth="260" maxWidth="260">
 
                 <ImageView fx:id="imgPortadaMain"
                            fitWidth="220"

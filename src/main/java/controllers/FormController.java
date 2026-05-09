@@ -60,10 +60,17 @@ public class FormController implements Initializable {
 
         rutaPortadaSeleccionada = juego.getRutaPortada();
         if (rutaPortadaSeleccionada != null && !rutaPortadaSeleccionada.isBlank()) {
-            File archivo = new File(rutaPortadaSeleccionada);
-            if (archivo.exists()) {
-                imgPortadaPreview.setImage(new Image(archivo.toURI().toString()));
-                lblRutaImagen.setText(archivo.getName());
+            if (rutaPortadaSeleccionada.startsWith("http")) {
+                // Imagen guardada en ImgBB (internet)
+                imgPortadaPreview.setImage(new Image(rutaPortadaSeleccionada, true));
+                lblRutaImagen.setText("Imagen en la nube ☁️");
+            } else {
+                // Imagen guardada en local (juegos antiguos)
+                File archivo = new File(rutaPortadaSeleccionada);
+                if (archivo.exists()) {
+                    imgPortadaPreview.setImage(new Image(archivo.toURI().toString()));
+                    lblRutaImagen.setText(archivo.getName());
+                }
             }
         }
 
@@ -86,7 +93,6 @@ public class FormController implements Initializable {
         }
     }
 
-    // Añade esta variable arriba con las demás
     private File archivoFisicoSeleccionado = null;
 
     @FXML

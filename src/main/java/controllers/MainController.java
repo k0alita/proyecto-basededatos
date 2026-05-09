@@ -79,17 +79,79 @@ public class MainController implements Initializable {
         colId.setVisible(false);
         colId.setStyle("-fx-alignment: CENTER;");
         colAnio.setStyle("-fx-alignment: CENTER;");
-        tablaJuegos.setFixedCellSize(40);
+        tablaJuegos.setFixedCellSize(72);
 
         // 3. Columna de miniatura con Caché
         colPortada.setCellFactory(col -> new TableCell<>() {
             private final ImageView imageView = new ImageView();
             private final javafx.scene.layout.StackPane contenedor = new javafx.scene.layout.StackPane();
+
+            // Animaciones de escala
+            private final javafx.animation.ScaleTransition scaleIn = new javafx.animation.ScaleTransition(
+                    javafx.util.Duration.millis(180), imageView
+            );
+            private final javafx.animation.ScaleTransition scaleOut = new javafx.animation.ScaleTransition(
+                    javafx.util.Duration.millis(180), imageView
+            );
+
             {
-                imageView.setFitWidth(32);
-                imageView.setFitHeight(32);
+                // Tamaño base de la miniatura
+                imageView.setFitWidth(44);
+                imageView.setFitHeight(44);
                 imageView.setPreserveRatio(true);
                 imageView.setSmooth(true);
+
+                // Clip circular para que la foto quede redonda como un avatar
+                javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(44, 44);
+                clip.setArcWidth(8);
+                clip.setArcHeight(8);
+                imageView.setClip(clip);
+
+                // Configurar animaciones
+                scaleIn.setToX(1.5);
+                scaleIn.setToY(1.5);
+                scaleIn.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+
+                scaleOut.setToX(1.0);
+                scaleOut.setToY(1.0);
+                scaleOut.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+
+                // Eventos del ratón sobre la FILA completa (no solo la imagen)
+                tableRowProperty().addListener((obs, oldRow, newRow) -> {
+                    if (oldRow != null) {
+                        oldRow.setOnMouseEntered(null);
+                        oldRow.setOnMouseExited(null);
+                    }
+                    if (newRow != null) {
+                        javafx.animation.Timeline expandir = new javafx.animation.Timeline(
+                                new javafx.animation.KeyFrame(javafx.util.Duration.millis(200),
+                                        new javafx.animation.KeyValue(
+                                                newRow.prefHeightProperty(), 110,
+                                                javafx.animation.Interpolator.EASE_OUT
+                                        )
+                                )
+                        );
+
+                        javafx.animation.Timeline encoger = new javafx.animation.Timeline(
+                                new javafx.animation.KeyFrame(javafx.util.Duration.millis(200),
+                                        new javafx.animation.KeyValue(
+                                                newRow.prefHeightProperty(), 72,
+                                                javafx.animation.Interpolator.EASE_OUT
+                                        )
+                                )
+                        );
+
+                        newRow.setOnMouseEntered(e -> {
+                            encoger.stop();
+                            expandir.playFromStart();
+                        });
+                        newRow.setOnMouseExited(e -> {
+                            expandir.stop();
+                            encoger.playFromStart();
+                        });
+                    }
+                });
+
                 contenedor.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
                 contenedor.setAlignment(javafx.geometry.Pos.CENTER);
                 contenedor.getChildren().add(imageView);
@@ -104,7 +166,6 @@ public class MainController implements Initializable {
                     return;
                 }
                 Juego juego = getTableView().getItems().get(getIndex());
-                // Llamamos a nuestro método mágico que gestiona internet, local y caché
                 imageView.setImage(getImagenConCache(juego.getRutaPortada()));
                 contenedor.setVisible(true);
             }
@@ -137,6 +198,8 @@ public class MainController implements Initializable {
         comboBuscarPlataforma.valueProperty().addListener((observable, oldValue, newValue) -> {
             cargarDatosTabla();
         });
+        // Forzar altura de filas desde Java (el FXML a veces lo ignora)
+        tablaJuegos.setFixedCellSize(72);
     }
 
     // ---- GESTIÓN DE IMÁGENES (LOCAL, INTERNET Y CACHÉ) ----
