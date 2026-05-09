@@ -50,16 +50,22 @@
                 </HBox>
             </HBox>
 
-            <!-- Buscador -->
+            <!-- Buscador y Editar (Todo en la misma línea) -->
             <HBox spacing="10" alignment="CENTER_LEFT" styleClass="header-section-inner">
                 <padding>
                     <Insets top="10" right="20" bottom="10" left="20"/>
                 </padding>
+
                 <Label text="Buscar:" styleClass="text-label"/>
                 <TextField fx:id="txtBuscarTitulo" promptText="Título del juego..." prefWidth="240"/>
                 <ComboBox fx:id="comboBuscarPlataforma" promptText="Plataforma..." prefWidth="180"/>
-                <Button text="Filtrar" onAction="#filtrarJuegos" styleClass="btn-primary"/>
-                <Button text="Limpiar" onAction="#limpiarFiltros" styleClass="btn-secondary"/>
+
+                <!-- Botón Editar al lado de los campos de búsqueda -->
+                <Button text="Editar Juego" onAction="#abrirFormularioEdicion" styleClass="btn-primary"/>
+
+                <!-- Este Region empuja Filtrar y Limpiar hacia la derecha -->
+                <Region HBox.hgrow="ALWAYS"/>
+
             </HBox>
         </VBox>
     </top>
@@ -75,10 +81,7 @@
             <TableView fx:id="tablaJuegos" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="colId" text="ID" prefWidth="45"/>
-
-                    <!-- Columna mini de portada -->
                     <TableColumn fx:id="colPortada" text="Portada" prefWidth="60"/>
-
                     <TableColumn fx:id="colTitulo" text="Título" prefWidth="360"/>
                     <TableColumn fx:id="colDesarrolladora" text="Desarrolladora" prefWidth="260"/>
                     <TableColumn fx:id="colAnio" text="Año" prefWidth="70"/>
