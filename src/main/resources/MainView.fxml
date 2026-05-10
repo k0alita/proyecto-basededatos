@@ -77,7 +77,7 @@
             </padding>
 
             <!-- Tabla de juegos (ocupa la mayor parte del ancho) -->
-            <TableView fx:id="tablaJuegos" fixedCellSize="72" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+            <TableView fx:id="tablaJuegos" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="colId" text="ID" prefWidth="45"/>
                     <TableColumn fx:id="colPortada" text="" prefWidth="72"/>

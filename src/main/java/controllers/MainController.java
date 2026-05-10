@@ -1,7 +1,11 @@
 package controllers;
 
 import dao.JuegoDAO;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -24,7 +28,6 @@ import models.Juego;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -50,7 +53,12 @@ public class MainController implements Initializable {
     private double yOffset;
     private final Map<String, Image> cacheImagenes = new HashMap<>();
     private final JuegoDAO juegoDAO = new JuegoDAO();
-    private PauseTransition pauseBusqueda = new PauseTransition(Duration.millis(300));
+    private final PauseTransition pauseBusqueda = new PauseTransition(Duration.millis(300));
+
+    private static final double ALTURA_BASE = 72;
+    private static final double ALTURA_MAX  = 110;
+
+    private TableRow<?> filaExpandida = null;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -71,7 +79,6 @@ public class MainController implements Initializable {
         colId.setVisible(false);
         colId.setStyle("-fx-alignment: CENTER;");
         colAnio.setStyle("-fx-alignment: CENTER;");
-        tablaJuegos.setFixedCellSize(72);
 
         // 3. Columna miniatura
         colPortada.setCellFactory(col -> new TableCell<>() {
@@ -91,6 +98,7 @@ public class MainController implements Initializable {
                 contenedor.getChildren().add(imageView);
                 setGraphic(contenedor);
             }
+
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -101,29 +109,94 @@ public class MainController implements Initializable {
             }
         });
 
-        // 4. RowFactory: doble clic para editar
+        // 4. RowFactory
         tablaJuegos.setRowFactory(tv -> {
             TableRow<Juego> row = new TableRow<>();
+            row.setMinHeight(ALTURA_BASE);
+            row.setPrefHeight(ALTURA_BASE);
+            row.setMaxHeight(ALTURA_BASE);
             row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    abrirFormularioEdicion();
-                }
+                if (event.getClickCount() == 2 && !row.isEmpty()) abrirFormularioEdicion();
             });
             return row;
         });
 
-        // 5. Cargar datos
+        // 5. Animación hover
+        tablaJuegos.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
+            TableRow<?> encontrada = null;
+
+            for (Node node : tablaJuegos.lookupAll(".table-row-cell")) {
+                if (node instanceof TableRow<?> r && !r.isEmpty()) {
+                    javafx.geometry.Bounds enScene = r.localToScene(r.getBoundsInLocal());
+                    javafx.geometry.Bounds enTabla = tablaJuegos.sceneToLocal(enScene);
+                    if (e.getY() >= enTabla.getMinY() && e.getY() <= enTabla.getMaxY()) {
+                        encontrada = r;
+                        break;
+                    }
+                }
+            }
+
+            if (encontrada != filaExpandida) {
+                encogerFila(filaExpandida);
+                expandirFila(encontrada);
+                filaExpandida = encontrada;
+            }
+        });
+
+        tablaJuegos.addEventFilter(MouseEvent.MOUSE_EXITED, e -> {
+            encogerFila(filaExpandida);
+            filaExpandida = null;
+        });
+
+        // 5.1 Reset al hacer scroll
+        tablaJuegos.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            if (newSkin == null) return;
+            ScrollBar sb = (ScrollBar) tablaJuegos.lookup(".scroll-bar:vertical");
+            if (sb != null) {
+                sb.valueProperty().addListener((o, oldVal, newVal) -> resetearFilas());
+            }
+        });
+
+        // 6. Cargar datos
         cargarDatosTabla();
 
-        // 6. Selección → detalle
+        // 7. Selección → detalle
         tablaJuegos.getSelectionModel().selectedItemProperty().addListener((obs, anterior, nuevo) ->
-                mostrarDetalle(nuevo)
-        );
+                mostrarDetalle(nuevo));
 
-        // 7. Búsqueda fluida
+        // 8. Búsqueda fluida
         pauseBusqueda.setOnFinished(event -> cargarDatosTabla());
         txtBuscarTitulo.textProperty().addListener((obs, oldVal, newVal) -> pauseBusqueda.playFromStart());
         comboBuscarPlataforma.valueProperty().addListener((obs, oldVal, newVal) -> cargarDatosTabla());
+    }
+
+    private void expandirFila(TableRow<?> row) {
+        if (row == null) return;
+        new Timeline(new KeyFrame(Duration.millis(180),
+                new KeyValue(row.minHeightProperty(), ALTURA_MAX, Interpolator.EASE_OUT),
+                new KeyValue(row.prefHeightProperty(), ALTURA_MAX, Interpolator.EASE_OUT),
+                new KeyValue(row.maxHeightProperty(), ALTURA_MAX, Interpolator.EASE_OUT)
+        )).play();
+    }
+
+    private void encogerFila(TableRow<?> row) {
+        if (row == null) return;
+        new Timeline(new KeyFrame(Duration.millis(180),
+                new KeyValue(row.minHeightProperty(), ALTURA_BASE, Interpolator.EASE_OUT),
+                new KeyValue(row.prefHeightProperty(), ALTURA_BASE, Interpolator.EASE_OUT),
+                new KeyValue(row.maxHeightProperty(), ALTURA_BASE, Interpolator.EASE_OUT)
+        )).play();
+    }
+
+    private void resetearFilas() {
+        filaExpandida = null;
+        for (Node node : tablaJuegos.lookupAll(".table-row-cell")) {
+            if (node instanceof TableRow<?> r) {
+                r.setMinHeight(ALTURA_BASE);
+                r.setPrefHeight(ALTURA_BASE);
+                r.setMaxHeight(ALTURA_BASE);
+            }
+        }
     }
 
     private Image getImagenPorDefecto() {
@@ -164,6 +237,7 @@ public class MainController implements Initializable {
     }
 
     private void cargarDatosTabla() {
+        resetearFilas();
         String titulo = txtBuscarTitulo.getText();
         String plataforma = comboBuscarPlataforma.getValue();
         if (plataforma != null && plataforma.equals("Todas")) plataforma = null;
