@@ -491,3 +491,76 @@
 .custom-alert > *.border-pane {
     -fx-border-color: transparent;
 }
+/* ── Panel detalle: secciones tipo tarjeta ───────────────── */
+.detail-section {
+    -fx-background-color: #1e1e2e;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12 8 12;
+    -fx-border-color: #2e2e3e;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);
+}
+
+/* Añade margen entre secciones sin spacing en el VBox padre */
+.panel-detalle > .detail-section {
+    -fx-translate-y: 0;
+}
+
+.detail-section-header {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 1.5;
+}
+
+.detail-section-value {
+    -fx-text-fill: #e0e0f0;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+}
+
+/* Título del juego encima de las secciones */
+.detail-title {
+    -fx-text-fill: white;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 12 4 12;
+}
+
+/* Estrellas en color dorado */
+.detail-section-value:contains("★") {
+    -fx-text-fill: #f5c518;
+}
+/* ScrollPane transparente en formulario */
+.form-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+/* Fondo transparente en el form para que se vea el degradado */
+.form-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.root-pane {
+    -fx-background-color: transparent;
+}
+.form-content {
+    -fx-background-color: transparent;
+}
+/* TextArea oscuro igual que los TextField */
+.text-area {
+    -fx-background-color: #1e1e2e;
+    -fx-border-color: #555577;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: #e0e0f0;
+}
+
+.text-area .content {
+    -fx-background-color: #1e1e2e;
+    -fx-background-radius: 6;
+}
+
+.text-area:focused {
+    -fx-border-color: #7777cc;
+}

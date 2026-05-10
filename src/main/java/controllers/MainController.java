@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Tooltip;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -20,11 +21,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import models.Juego;
-
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
+import javafx.animation.ParallelTransition;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
@@ -49,7 +53,10 @@ public class MainController implements Initializable {
     @FXML private Label lblDetalleAnio;
     @FXML private Label lblDetallePlataformas;
     @FXML private Label lblDetalleGeneros;
-
+    @FXML private Label lblDetalleDescripcion;
+    @FXML private Label lblDetalleRatingEstrellas;
+    @FXML private Label lblDetalleRatingNum;
+    @FXML private VBox panelDetalle;
     private double xOffset;
     private double yOffset;
     private final Map<String, Image> cacheImagenes = new HashMap<>();
@@ -92,7 +99,10 @@ public class MainController implements Initializable {
         // 4. Columna miniatura
         colPortada.setCellFactory(col -> new TableCell<>() {
             private final ImageView imageView = new ImageView();
+            private final ImageView tooltipImg = new ImageView();
+            private final Tooltip tooltip = new Tooltip();
             private final javafx.scene.layout.StackPane contenedor = new javafx.scene.layout.StackPane();
+
             {
                 imageView.setFitWidth(44);
                 imageView.setFitHeight(44);
@@ -106,12 +116,28 @@ public class MainController implements Initializable {
                 contenedor.setAlignment(javafx.geometry.Pos.CENTER);
                 contenedor.getChildren().add(imageView);
                 setGraphic(contenedor);
+
+                tooltipImg.setFitWidth(180);
+                tooltipImg.setFitHeight(240);
+                tooltipImg.setPreserveRatio(true);
+                tooltipImg.setSmooth(true);
+                tooltip.setGraphic(tooltipImg);
+                tooltip.setStyle("-fx-background-color: #1e1e2e; -fx-background-radius: 10; -fx-padding: 8;");
+
+                contenedor.setOnMouseEntered(e -> {
+                    if (!isEmpty() && getIndex() < getTableView().getItems().size()) {
+                        Juego juego = getTableView().getItems().get(getIndex());
+                        tooltipImg.setImage(getImagenConCache(juego.getRutaPortada()));
+                        tooltip.show(contenedor, e.getScreenX() + 15, e.getScreenY() + 10);
+                    }
+                });
+                contenedor.setOnMouseExited(e -> tooltip.hide());
             }
 
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) { contenedor.setVisible(false); return; }
+                if (empty) { contenedor.setVisible(false); tooltip.hide(); return; }
                 Juego juego = getTableView().getItems().get(getIndex());
                 imageView.setImage(getImagenConCache(juego.getRutaPortada()));
                 contenedor.setVisible(true);
@@ -247,21 +273,62 @@ public class MainController implements Initializable {
     }
 
     private void mostrarDetalle(Juego juego) {
-        if (juego == null) {
-            lblDetalleTitulo.setText("—");
-            lblDetalleDesarrolladora.setText("—");
-            lblDetalleAnio.setText("—");
-            lblDetallePlataformas.setText("—");
-            lblDetalleGeneros.setText("—");
-            imgPortadaMain.setImage(getImagenPorDefecto());
-            return;
-        }
-        lblDetalleTitulo.setText(juego.getTitulo());
-        lblDetalleDesarrolladora.setText(juego.getDesarrolladora());
-        lblDetalleAnio.setText(String.valueOf(juego.getAnioLanzamiento()));
-        lblDetallePlataformas.setText(juego.getPlataformas());
-        lblDetalleGeneros.setText(juego.getGeneros());
-        imgPortadaMain.setImage(getImagenConCache(juego.getRutaPortada()));
+        // Fade out primero
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(120), panelDetalle);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+        fadeOut.setOnFinished(e -> {
+            // Rellena los datos
+            if (juego == null) {
+                lblDetalleTitulo.setText("—");
+                lblDetalleDesarrolladora.setText("—");
+                lblDetalleAnio.setText("—");
+                lblDetallePlataformas.setText("—");
+                lblDetalleGeneros.setText("—");
+                lblDetalleDescripcion.setText("—");
+                lblDetalleRatingEstrellas.setText("—");
+                lblDetalleRatingNum.setText("—");
+                imgPortadaMain.setImage(getImagenPorDefecto());
+            } else {
+                lblDetalleTitulo.setText(juego.getTitulo());
+                lblDetalleDesarrolladora.setText(juego.getDesarrolladora());
+                lblDetalleAnio.setText(String.valueOf(juego.getAnioLanzamiento()));
+                lblDetallePlataformas.setText(juego.getPlataformas());
+                lblDetalleGeneros.setText(juego.getGeneros());
+                lblDetalleDescripcion.setText(
+                        juego.getDescripcion() != null && !juego.getDescripcion().isBlank()
+                                ? juego.getDescripcion() : "Sin descripción"
+                );
+                double r = juego.getRating();
+                if (r > 0) {
+                    StringBuilder estrellas = new StringBuilder();
+                    for (int i = 1; i <= 5; i++) {
+                        if (r >= i) estrellas.append("★");
+                        else if (r >= i - 0.5) estrellas.append("✮");
+                        else estrellas.append("☆");
+                    }
+                    lblDetalleRatingEstrellas.setText(estrellas.toString());
+                    lblDetalleRatingNum.setText(r + " / 5");
+                } else {
+                    lblDetalleRatingEstrellas.setText("☆☆☆☆☆");
+                    lblDetalleRatingNum.setText("—");
+                }
+                imgPortadaMain.setImage(getImagenConCache(juego.getRutaPortada()));
+            }
+
+            // Fade in + slide desde abajo
+            panelDetalle.setTranslateY(18);
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(200), panelDetalle);
+            fadeIn.setFromValue(0.0);
+            fadeIn.setToValue(1.0);
+            TranslateTransition slide = new TranslateTransition(Duration.millis(200), panelDetalle);
+            slide.setFromY(18);
+            slide.setToY(0);
+            slide.setInterpolator(Interpolator.EASE_OUT);
+            ParallelTransition entrada = new ParallelTransition(fadeIn, slide);
+            entrada.play();
+        });
+        fadeOut.play();
     }
 
     private void cargarDatosTabla() {

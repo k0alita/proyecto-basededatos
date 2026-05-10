@@ -15,6 +15,7 @@ public class JuegoDAO {
 
         StringBuilder sql = new StringBuilder(
                 "SELECT j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada, " +
+                        "j.descripcion, j.rating, " +
                         "GROUP_CONCAT(DISTINCT p.nombre SEPARATOR ', ') AS plataformas_juego, " +
                         "GROUP_CONCAT(DISTINCT g.nombre SEPARATOR ', ') AS generos_juego " +
                         "FROM juegos j " +
@@ -39,7 +40,7 @@ public class JuegoDAO {
                     "WHERE g2.nombre = ?) ");
         }
 
-        sql.append("GROUP BY j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada");
+        sql.append("GROUP BY j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada, j.descripcion, j.rating");
 
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -50,7 +51,6 @@ public class JuegoDAO {
             if (nombrePlataforma != null && !nombrePlataforma.trim().isEmpty()) {
                 ps.setString(paramIndex++, nombrePlataforma);
             }
-
             if (nombreGenero != null && !nombreGenero.trim().isEmpty()) {
                 ps.setString(paramIndex++, nombreGenero);
             }
@@ -66,7 +66,9 @@ public class JuegoDAO {
                             rs.getInt("anio_lanzamiento"),
                             plataformas != null ? plataformas : "Sin plataforma",
                             generos != null ? generos : "Sin género",
-                            rs.getString("ruta_portada")
+                            rs.getString("ruta_portada"),
+                            rs.getString("descripcion") != null ? rs.getString("descripcion") : "",
+                            rs.getDouble("rating")
                     ));
                 }
             }
@@ -77,7 +79,7 @@ public class JuegoDAO {
     }
 
     public boolean insertarJuegoConTransaccion(Juego juego, List<Integer> idsPlataformas, List<Integer> idsGeneros) {
-        String sqlJuego = "INSERT INTO juegos (titulo, desarrolladora, anio_lanzamiento, ruta_portada) VALUES (?, ?, ?, ?)";
+        String sqlJuego = "INSERT INTO juegos (titulo, desarrolladora, anio_lanzamiento, ruta_portada, descripcion, rating) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlPlataforma = "INSERT INTO juegos_plataformas (id_juego, id_plataforma) VALUES (?, ?)";
         String sqlGenero = "INSERT INTO juegos_generos (id_juego, id_genero) VALUES (?, ?)";
 
@@ -92,6 +94,8 @@ public class JuegoDAO {
                 ps.setString(2, juego.getDesarrolladora());
                 ps.setInt(3, juego.getAnioLanzamiento());
                 ps.setString(4, juego.getRutaPortada());
+                ps.setString(5, juego.getDescripcion());
+                ps.setDouble(6, juego.getRating());
                 ps.executeUpdate();
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (!rs.next()) throw new SQLException("No se obtuvo el ID generado.");
@@ -130,7 +134,7 @@ public class JuegoDAO {
     }
 
     public boolean actualizarJuegoConTransaccion(Juego juego, List<Integer> idsPlataformas, List<Integer> idsGeneros) {
-        String sqlUpdate = "UPDATE juegos SET titulo=?, desarrolladora=?, anio_lanzamiento=?, ruta_portada=? WHERE id_juego=?";
+        String sqlUpdate = "UPDATE juegos SET titulo=?, desarrolladora=?, anio_lanzamiento=?, ruta_portada=?, descripcion=?, rating=? WHERE id_juego=?";
         String sqlDeletePlat = "DELETE FROM juegos_plataformas WHERE id_juego=?";
         String sqlDeleteGen = "DELETE FROM juegos_generos WHERE id_juego=?";
         String sqlInsertPlat = "INSERT INTO juegos_plataformas (id_juego, id_plataforma) VALUES (?, ?)";
@@ -146,7 +150,9 @@ public class JuegoDAO {
                 ps.setString(2, juego.getDesarrolladora());
                 ps.setInt(3, juego.getAnioLanzamiento());
                 ps.setString(4, juego.getRutaPortada());
-                ps.setInt(5, juego.getId());
+                ps.setString(5, juego.getDescripcion());
+                ps.setDouble(6, juego.getRating());
+                ps.setInt(7, juego.getId());
                 ps.executeUpdate();
             }
 
