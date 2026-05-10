@@ -2,7 +2,9 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.scene.image.Image;
 
 public class Main extends Application {
@@ -13,19 +15,17 @@ public class Main extends Application {
 
         primaryStage.setTitle("RobloxGames - Gestor de Videojuegos de Roblox");
 
-        // Ponemos iconno
         try {
             Image icon = new Image(getClass().getResourceAsStream("portadas/robloxapp.png"));
             primaryStage.getIcons().add(icon);
         } catch (Exception e) {
-           System.err.println("No se pudo cargar el icono: " + e.getMessage());
+            System.err.println("No se pudo cargar el icono: " + e.getMessage());
         }
 
         Scene scene = new Scene(root, 1400, 800);
+        scene.setFill(Color.TRANSPARENT);
 
-        // Quitar barra de título del sistema
-        primaryStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
-
+        primaryStage.initStyle(StageStyle.TRANSPARENT);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
         primaryStage.show();

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class JuegoDAO {
 
-    public List<Juego> buscarJuegos(String titulo, String nombrePlataforma) {
+    public List<Juego> buscarJuegos(String titulo, String nombrePlataforma, String nombreGenero) {
         List<Juego> lista = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
@@ -32,14 +32,27 @@ public class JuegoDAO {
                     "WHERE p2.nombre = ?) ");
         }
 
+        if (nombreGenero != null && !nombreGenero.trim().isEmpty()) {
+            sql.append("AND j.id_juego IN (" +
+                    "SELECT jg2.id_juego FROM juegos_generos jg2 " +
+                    "JOIN generos g2 ON jg2.id_genero = g2.id_genero " +
+                    "WHERE g2.nombre = ?) ");
+        }
+
         sql.append("GROUP BY j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada");
 
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
-            ps.setString(1, "%" + (titulo != null ? titulo : "") + "%");
+            int paramIndex = 1;
+            ps.setString(paramIndex++, "%" + (titulo != null ? titulo : "") + "%");
+
             if (nombrePlataforma != null && !nombrePlataforma.trim().isEmpty()) {
-                ps.setString(2, nombrePlataforma);
+                ps.setString(paramIndex++, nombrePlataforma);
+            }
+
+            if (nombreGenero != null && !nombreGenero.trim().isEmpty()) {
+                ps.setString(paramIndex++, nombreGenero);
             }
 
             try (ResultSet rs = ps.executeQuery()) {

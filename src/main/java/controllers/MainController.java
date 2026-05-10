@@ -36,6 +36,7 @@ public class MainController implements Initializable {
 
     @FXML private TextField txtBuscarTitulo;
     @FXML private ComboBox<String> comboBuscarPlataforma;
+    @FXML private ComboBox<String> comboBuscarGenero;
     @FXML private TableView<Juego> tablaJuegos;
     @FXML private TableColumn<Juego, Integer> colId;
     @FXML private TableColumn<Juego, String> colTitulo;
@@ -65,13 +66,21 @@ public class MainController implements Initializable {
 
         // 1. Plataformas
         comboBuscarPlataforma.getItems().clear();
-        comboBuscarPlataforma.getItems().add("Todas");
+        comboBuscarPlataforma.getItems().add("Plataformas");
         for (models.Plataforma p : juegoDAO.obtenerPlataformas()) {
             comboBuscarPlataforma.getItems().add(p.getNombre());
         }
         comboBuscarPlataforma.getSelectionModel().selectFirst();
 
-        // 2. Columnas
+        // 2. Géneros
+        comboBuscarGenero.getItems().clear();
+        comboBuscarGenero.getItems().add("Géneros");
+        for (models.Genero g : juegoDAO.obtenerGeneros()) {
+            comboBuscarGenero.getItems().add(g.getNombre());
+        }
+        comboBuscarGenero.getSelectionModel().selectFirst();
+
+        // 3. Columnas
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colDesarrolladora.setCellValueFactory(new PropertyValueFactory<>("desarrolladora"));
@@ -80,7 +89,7 @@ public class MainController implements Initializable {
         colId.setStyle("-fx-alignment: CENTER;");
         colAnio.setStyle("-fx-alignment: CENTER;");
 
-        // 3. Columna miniatura
+        // 4. Columna miniatura
         colPortada.setCellFactory(col -> new TableCell<>() {
             private final ImageView imageView = new ImageView();
             private final javafx.scene.layout.StackPane contenedor = new javafx.scene.layout.StackPane();
@@ -109,7 +118,7 @@ public class MainController implements Initializable {
             }
         });
 
-        // 4. RowFactory
+        // 5. RowFactory
         tablaJuegos.setRowFactory(tv -> {
             TableRow<Juego> row = new TableRow<>();
             row.setMinHeight(ALTURA_BASE);
@@ -121,10 +130,9 @@ public class MainController implements Initializable {
             return row;
         });
 
-        // 5. Animación hover
+        // 6. Animación hover
         tablaJuegos.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
             TableRow<?> encontrada = null;
-
             for (Node node : tablaJuegos.lookupAll(".table-row-cell")) {
                 if (node instanceof TableRow<?> r && !r.isEmpty()) {
                     javafx.geometry.Bounds enScene = r.localToScene(r.getBoundsInLocal());
@@ -135,7 +143,6 @@ public class MainController implements Initializable {
                     }
                 }
             }
-
             if (encontrada != filaExpandida) {
                 encogerFila(filaExpandida);
                 expandirFila(encontrada);
@@ -148,7 +155,7 @@ public class MainController implements Initializable {
             filaExpandida = null;
         });
 
-        // 5.1 Reset al hacer scroll
+        // 6.1 Reset al hacer scroll
         tablaJuegos.skinProperty().addListener((obs, oldSkin, newSkin) -> {
             if (newSkin == null) return;
             ScrollBar sb = (ScrollBar) tablaJuegos.lookup(".scroll-bar:vertical");
@@ -157,17 +164,38 @@ public class MainController implements Initializable {
             }
         });
 
-        // 6. Cargar datos
+        // 7. Cargar datos
         cargarDatosTabla();
 
-        // 7. Selección → detalle
+        // 8. Selección → detalle
         tablaJuegos.getSelectionModel().selectedItemProperty().addListener((obs, anterior, nuevo) ->
                 mostrarDetalle(nuevo));
 
-        // 8. Búsqueda fluida
+        // 9. Búsqueda fluida
         pauseBusqueda.setOnFinished(event -> cargarDatosTabla());
         txtBuscarTitulo.textProperty().addListener((obs, oldVal, newVal) -> pauseBusqueda.playFromStart());
-        comboBuscarPlataforma.valueProperty().addListener((obs, oldVal, newVal) -> cargarDatosTabla());
+
+        // 10. Listeners combos con estilo activo
+        comboBuscarPlataforma.valueProperty().addListener((obs, oldVal, newVal) -> {
+            actualizarEstiloCombo(comboBuscarPlataforma, "Plataformas");
+            cargarDatosTabla();
+        });
+
+        comboBuscarGenero.valueProperty().addListener((obs, oldVal, newVal) -> {
+            actualizarEstiloCombo(comboBuscarGenero, "Géneros");
+            cargarDatosTabla();
+        });
+    }
+
+    // Resalta el combo cuando tiene un filtro activo
+    private void actualizarEstiloCombo(ComboBox<String> combo, String valorNeutro) {
+        if (combo.getValue() == null || combo.getValue().equals(valorNeutro)) {
+            combo.getStyleClass().remove("combo-activo");
+        } else {
+            if (!combo.getStyleClass().contains("combo-activo")) {
+                combo.getStyleClass().add("combo-activo");
+            }
+        }
     }
 
     private void expandirFila(TableRow<?> row) {
@@ -220,19 +248,19 @@ public class MainController implements Initializable {
 
     private void mostrarDetalle(Juego juego) {
         if (juego == null) {
-            lblDetalleTitulo.setText("Título: -");
-            lblDetalleDesarrolladora.setText("Desarrolladora: -");
-            lblDetalleAnio.setText("Año: -");
-            lblDetallePlataformas.setText("Plataformas: -");
-            lblDetalleGeneros.setText("Géneros: -");
+            lblDetalleTitulo.setText("—");
+            lblDetalleDesarrolladora.setText("—");
+            lblDetalleAnio.setText("—");
+            lblDetallePlataformas.setText("—");
+            lblDetalleGeneros.setText("—");
             imgPortadaMain.setImage(getImagenPorDefecto());
             return;
         }
-        lblDetalleTitulo.setText("Título: " + juego.getTitulo());
-        lblDetalleDesarrolladora.setText("Desarrolladora: " + juego.getDesarrolladora());
-        lblDetalleAnio.setText("Año: " + juego.getAnioLanzamiento());
-        lblDetallePlataformas.setText("Plataformas: " + juego.getPlataformas());
-        lblDetalleGeneros.setText("Géneros: " + juego.getGeneros());
+        lblDetalleTitulo.setText(juego.getTitulo());
+        lblDetalleDesarrolladora.setText(juego.getDesarrolladora());
+        lblDetalleAnio.setText(String.valueOf(juego.getAnioLanzamiento()));
+        lblDetallePlataformas.setText(juego.getPlataformas());
+        lblDetalleGeneros.setText(juego.getGeneros());
         imgPortadaMain.setImage(getImagenConCache(juego.getRutaPortada()));
     }
 
@@ -240,9 +268,33 @@ public class MainController implements Initializable {
         resetearFilas();
         String titulo = txtBuscarTitulo.getText();
         String plataforma = comboBuscarPlataforma.getValue();
-        if (plataforma != null && plataforma.equals("Todas")) plataforma = null;
-        ObservableList<Juego> lista = FXCollections.observableArrayList(juegoDAO.buscarJuegos(titulo, plataforma));
+        String genero = comboBuscarGenero.getValue();
+        if (plataforma != null && plataforma.equals("Plataformas")) plataforma = null;
+        if (genero != null && genero.equals("Géneros")) genero = null;
+        ObservableList<Juego> lista = FXCollections.observableArrayList(
+                juegoDAO.buscarJuegos(titulo, plataforma, genero)
+        );
         tablaJuegos.setItems(lista);
+    }
+
+    @FXML
+    private void refrescarTabla() {
+        cacheImagenes.clear();
+        comboBuscarPlataforma.getItems().clear();
+        comboBuscarPlataforma.getItems().add("Plataformas");
+        for (models.Plataforma p : juegoDAO.obtenerPlataformas()) {
+            comboBuscarPlataforma.getItems().add(p.getNombre());
+        }
+        comboBuscarPlataforma.getSelectionModel().selectFirst();
+
+        comboBuscarGenero.getItems().clear();
+        comboBuscarGenero.getItems().add("Géneros");
+        for (models.Genero g : juegoDAO.obtenerGeneros()) {
+            comboBuscarGenero.getItems().add(g.getNombre());
+        }
+        comboBuscarGenero.getSelectionModel().selectFirst();
+
+        cargarDatosTabla();
     }
 
     @FXML private void abrirFormularioAlta() { abrirModalFormulario(null, "Añadir Juego Nuevo"); }
