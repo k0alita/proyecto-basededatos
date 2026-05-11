@@ -184,7 +184,7 @@
 }
 
 .table-row-cell:hover {
-    -fx-background-color: rgba(56,139,253,0.12);
+    -fx-background-color: transparent;
 }
 
 .table-view .table-cell {
