@@ -10,10 +10,11 @@ public class Juego {
     private String rutaPortada;
     private String descripcion;
     private double rating;
+    private String creadoPor;
 
     public Juego(int id, String titulo, String desarrolladora, int anioLanzamiento,
                  String plataformas, String generos, String rutaPortada,
-                 String descripcion, double rating) {
+                 String descripcion, double rating, String creadoPor) {
         this.id = id;
         this.titulo = titulo;
         this.desarrolladora = desarrolladora;
@@ -23,6 +24,7 @@ public class Juego {
         this.rutaPortada = rutaPortada;
         this.descripcion = descripcion;
         this.rating = rating;
+        this.creadoPor = creadoPor;
     }
 
     public int getId() { return id; }
@@ -44,4 +46,5 @@ public class Juego {
     public void setRutaPortada(String rutaPortada) { this.rutaPortada = rutaPortada; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
     public void setRating(double rating) { this.rating = rating; }
+    public String getCreadoPor() { return creadoPor; }
 }

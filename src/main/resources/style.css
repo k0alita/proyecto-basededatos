@@ -210,7 +210,6 @@
     -fx-font-weight: normal;
 }
 
-/* Scrollbar de la tabla */
 .table-view .scroll-bar:vertical {
     -fx-background-color: transparent;
     -fx-pref-width: 8px;
@@ -344,7 +343,6 @@
     -fx-background-color: #fcecc8;
 }
 
-/* Botón refresco */
 .btn-refresh {
     -fx-background-color: rgba(56,139,253,0.1);
     -fx-text-fill: rgba(130,180,255,0.85);
@@ -366,7 +364,7 @@
 }
 
 /* ============================
-   COMBO ACTIVO (filtro aplicado)
+   COMBO ACTIVO
    ============================ */
 .combo-activo {
     -fx-background-color: rgba(56,139,253,0.18);
@@ -385,7 +383,7 @@
 }
 
 /* ============================
-   LISTVIEW (formulario)
+   LISTVIEW
    ============================ */
 .list-view {
     -fx-background-color: rgba(30, 30, 46, 0.9);
@@ -446,7 +444,7 @@
 }
 
 /* ============================
-   ALERTAS PERSONALIZADAS
+   ALERTAS
    ============================ */
 .custom-alert {
     -fx-background-color: #1e1e2e;
@@ -491,7 +489,10 @@
 .custom-alert > *.border-pane {
     -fx-border-color: transparent;
 }
-/* ── Panel detalle: secciones tipo tarjeta ───────────────── */
+
+/* ============================
+   PANEL DETALLE SECCIONES
+   ============================ */
 .detail-section {
     -fx-background-color: #1e1e2e;
     -fx-background-radius: 8;
@@ -500,11 +501,6 @@
     -fx-border-radius: 8;
     -fx-border-width: 1;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);
-}
-
-/* Añade margen entre secciones sin spacing en el VBox padre */
-.panel-detalle > .detail-section {
-    -fx-translate-y: 0;
 }
 
 .detail-section-header {
@@ -520,7 +516,6 @@
     -fx-font-weight: normal;
 }
 
-/* Título del juego encima de las secciones */
 .detail-title {
     -fx-text-fill: white;
     -fx-font-size: 17px;
@@ -528,15 +523,9 @@
     -fx-padding: 8 12 4 12;
 }
 
-/* Estrellas en color dorado */
-.detail-section-value:contains("★") {
-    -fx-text-fill: #f5c518;
-}
-/* ScrollPane transparente en formulario */
-.form-scroll > .viewport {
-    -fx-background-color: transparent;
-}
-/* Fondo transparente en el form para que se vea el degradado */
+/* ============================
+   SCROLL / FORM
+   ============================ */
 .form-scroll > .viewport {
     -fx-background-color: transparent;
 }
@@ -544,10 +533,14 @@
 .root-pane {
     -fx-background-color: transparent;
 }
+
 .form-content {
     -fx-background-color: transparent;
 }
-/* TextArea oscuro igual que los TextField */
+
+/* ============================
+   TEXTAREA
+   ============================ */
 .text-area {
     -fx-background-color: #1e1e2e;
     -fx-border-color: #555577;
@@ -563,4 +556,53 @@
 
 .text-area:focused {
     -fx-border-color: #7777cc;
+}
+
+/* ============================
+   TABPANE
+   ============================ */
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: rgba(20, 20, 35, 0.9);
+    -fx-border-radius: 10 10 0 0;
+    -fx-background-radius: 10 10 0 0;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: rgba(30, 30, 46, 0.6);
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 8 30;
+    -fx-pref-width: 190px;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #888aaa;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: rgba(56, 139, 253, 0.25);
+    -fx-border-color: rgba(56, 139, 253, 0.5);
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #cdd6f4;
+}
+
+.tab-pane .tab:hover .tab-label {
+    -fx-text-fill: #cdd6f4;
+}
+
+.tab-pane .tab-header-area .control-buttons-tab {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
 }

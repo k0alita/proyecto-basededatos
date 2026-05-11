@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import models.Juego;
 import models.Genero;
 import models.Plataforma;
+import models.Usuario;
 import utils.ImgBBUploader;
 import java.io.File;
 import java.net.URL;
@@ -34,6 +35,13 @@ public class FormController implements Initializable {
     private String rutaPortadaSeleccionada = null;
     private boolean modoEdicion = false;
     private Juego juegoEditando = null;
+
+
+    private Usuario usuarioActual;
+
+    public void setUsuarioActual(Usuario usuario) {
+        this.usuarioActual = usuario;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -162,7 +170,7 @@ public class FormController implements Initializable {
                 juegoEditando.setRating(rating);
                 exito = juegoDAO.actualizarJuegoConTransaccion(juegoEditando, idsPlataformas, idsGeneros);
             } else {
-                Juego nuevoJuego = new Juego(0, titulo, desarrolladora, anio, "", "", rutaPortadaSeleccionada, descripcion, rating);
+                Juego nuevoJuego = new Juego(0, titulo, desarrolladora, anio, "", "", rutaPortadaSeleccionada, descripcion, rating,usuarioActual != null ? usuarioActual.getUsername() : "desconocido");
                 exito = juegoDAO.insertarJuegoConTransaccion(nuevoJuego, idsPlataformas, idsGeneros);
             }
 
@@ -188,4 +196,5 @@ public class FormController implements Initializable {
         alert.getDialogPane().getStyleClass().add("custom-alert");
         alert.showAndWait();
     }
+
 }

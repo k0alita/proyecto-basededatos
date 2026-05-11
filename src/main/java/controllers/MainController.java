@@ -29,6 +29,8 @@ import models.Juego;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.animation.ParallelTransition;
+import models.Usuario;
+
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
@@ -57,6 +59,10 @@ public class MainController implements Initializable {
     @FXML private Label lblDetalleRatingEstrellas;
     @FXML private Label lblDetalleRatingNum;
     @FXML private VBox panelDetalle;
+    @FXML private Label lblDetalleCreadoPor;
+
+
+
     private double xOffset;
     private double yOffset;
     private final Map<String, Image> cacheImagenes = new HashMap<>();
@@ -65,8 +71,14 @@ public class MainController implements Initializable {
 
     private static final double ALTURA_BASE = 72;
     private static final double ALTURA_MAX  = 110;
+    private Usuario usuarioActual;
 
     private TableRow<?> filaExpandida = null;
+
+    public void setUsuarioActual(Usuario usuario) {
+        this.usuarioActual = usuario;
+        System.out.println("Sesión iniciada: " + usuario.getUsername());
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -273,12 +285,10 @@ public class MainController implements Initializable {
     }
 
     private void mostrarDetalle(Juego juego) {
-        // Fade out primero
         FadeTransition fadeOut = new FadeTransition(Duration.millis(120), panelDetalle);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0.0);
         fadeOut.setOnFinished(e -> {
-            // Rellena los datos
             if (juego == null) {
                 lblDetalleTitulo.setText("—");
                 lblDetalleDesarrolladora.setText("—");
@@ -288,6 +298,7 @@ public class MainController implements Initializable {
                 lblDetalleDescripcion.setText("—");
                 lblDetalleRatingEstrellas.setText("—");
                 lblDetalleRatingNum.setText("—");
+                lblDetalleCreadoPor.setText("—");
                 imgPortadaMain.setImage(getImagenPorDefecto());
             } else {
                 lblDetalleTitulo.setText(juego.getTitulo());
@@ -313,10 +324,13 @@ public class MainController implements Initializable {
                     lblDetalleRatingEstrellas.setText("☆☆☆☆☆");
                     lblDetalleRatingNum.setText("—");
                 }
+                lblDetalleCreadoPor.setText(
+                        juego.getCreadoPor() != null && !juego.getCreadoPor().isBlank()
+                                ? "👤 " + juego.getCreadoPor() : "—"
+                );
                 imgPortadaMain.setImage(getImagenConCache(juego.getRutaPortada()));
             }
 
-            // Fade in + slide desde abajo
             panelDetalle.setTranslateY(18);
             FadeTransition fadeIn = new FadeTransition(Duration.millis(200), panelDetalle);
             fadeIn.setFromValue(0.0);
@@ -325,8 +339,7 @@ public class MainController implements Initializable {
             slide.setFromY(18);
             slide.setToY(0);
             slide.setInterpolator(Interpolator.EASE_OUT);
-            ParallelTransition entrada = new ParallelTransition(fadeIn, slide);
-            entrada.play();
+            new ParallelTransition(fadeIn, slide).play();
         });
         fadeOut.play();
     }
@@ -380,7 +393,9 @@ public class MainController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FormView.fxml"));
             Parent root = loader.load();
-            if (juego != null) loader.<FormController>getController().setJuegoEditar(juego);
+            FormController formController = loader.<FormController>getController(); // ← cambia esta línea
+            if (juego != null) formController.setJuegoEditar(juego);
+            formController.setUsuarioActual(usuarioActual); // ← añade esta línea
             Stage stage = new Stage();
             stage.setTitle(tituloVentana);
             stage.initModality(Modality.APPLICATION_MODAL);

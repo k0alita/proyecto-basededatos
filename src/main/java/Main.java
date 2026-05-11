@@ -11,20 +11,19 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/MainView.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/LoginView.fxml"));
 
-        primaryStage.setTitle("RobloxGames - Gestor de Videojuegos de Roblox");
+        primaryStage.setTitle("RobloxGames - Login");
 
         try {
-            Image icon = new Image(getClass().getResourceAsStream("portadas/robloxapp.png"));
+            Image icon = new Image(getClass().getResourceAsStream("/portadas/robloxapp.png"));
             primaryStage.getIcons().add(icon);
         } catch (Exception e) {
             System.err.println("No se pudo cargar el icono: " + e.getMessage());
         }
 
-        Scene scene = new Scene(root, 1400, 800);
+        Scene scene = new Scene(root, 460, 630);
         scene.setFill(Color.TRANSPARENT);
-
         primaryStage.initStyle(StageStyle.TRANSPARENT);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();

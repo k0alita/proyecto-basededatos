@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.geometry.Insets?>
+
+<StackPane stylesheets="@style.css"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controllers.LoginController">
+
+    <!-- Fondo -->
+    <Region mouseTransparent="true"
+            style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #0d1b3e, #1a1a4e, #0a0a2a);"/>
+
+    <!-- Barra título -->
+    <VBox alignment="TOP_CENTER">
+        <HBox styleClass="title-bar" alignment="CENTER"
+              onMousePressed="#onTitleBarPressed"
+              onMouseDragged="#onTitleBarDragged">
+            <padding><Insets top="6" right="12" bottom="6" left="12"/></padding>
+            <Label text="RobloxGames" styleClass="title-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="✕" onAction="#cerrarVentana" styleClass="btn-titlebar-cerrar"/>
+        </HBox>
+    </VBox>
+
+    <!-- Contenido centrado -->
+    <VBox alignment="CENTER" spacing="16" maxWidth="360">
+        <padding><Insets top="50" right="30" bottom="30" left="30"/></padding>
+
+        <Label text="RobloxGames" styleClass="title-label"
+               style="-fx-font-size: 24px;"/>
+        <Label text="Bienvenido 👋" styleClass="text-label"/>
+
+        <TabPane tabClosingPolicy="UNAVAILABLE"
+                 style="-fx-background-color: transparent; -fx-tab-min-width: 140px;">
+
+            <!-- PESTAÑA LOGIN -->
+            <Tab text="Iniciar sesión">
+                <VBox spacing="10" style="-fx-background-color: rgba(30,30,46,0.85);
+                                          -fx-background-radius: 0 0 14 14;
+                                          -fx-border-color: rgba(56,139,253,0.25);
+                                          -fx-border-radius: 0 0 14 14;
+                                          -fx-padding: 20;">
+
+                    <Label text="Usuario" styleClass="text-label"/>
+                    <TextField fx:id="txtUsername" promptText="Ej: admin"/>
+
+                    <Label text="Contraseña" styleClass="text-label"/>
+                    <PasswordField fx:id="txtPassword" promptText="••••••••"/>
+
+                    <Label fx:id="lblError" styleClass="text-label"
+                           style="-fx-text-fill: #f38ba8; -fx-font-size: 12px;"
+                           wrapText="true" visible="false"/>
+
+                    <Button fx:id="btnLogin" text="Entrar" onAction="#hacerLogin"
+                            styleClass="btn-success" maxWidth="Infinity"
+                            style="-fx-font-size: 14px; -fx-padding: 10 0;"/>
+                </VBox>
+            </Tab>
+
+            <!-- PESTAÑA REGISTRO -->
+            <Tab text="Registrarse">
+                <VBox spacing="10" style="-fx-background-color: rgba(30,30,46,0.85);
+                                          -fx-background-radius: 0 0 14 14;
+                                          -fx-border-color: rgba(56,139,253,0.25);
+                                          -fx-border-radius: 0 0 14 14;
+                                          -fx-padding: 20;">
+
+                    <Label text="Nombre completo" styleClass="text-label"/>
+                    <TextField fx:id="txtRegNombre" promptText="Ej: Juan García"/>
+
+                    <Label text="Usuario" styleClass="text-label"/>
+                    <TextField fx:id="txtRegUsername" promptText="Ej: juangar"/>
+
+                    <Label text="Contraseña" styleClass="text-label"/>
+                    <PasswordField fx:id="txtRegPassword" promptText="••••••••"/>
+
+                    <Label text="Repetir contraseña" styleClass="text-label"/>
+                    <PasswordField fx:id="txtRegPassword2" promptText="••••••••"/>
+
+                    <Label fx:id="lblErrorRegistro" styleClass="text-label"
+                           style="-fx-text-fill: #f38ba8; -fx-font-size: 12px;"
+                           wrapText="true" visible="false"/>
+
+                    <Button text="Crear cuenta" onAction="#hacerRegistro"
+                            styleClass="btn-primary" maxWidth="Infinity"
+                            style="-fx-font-size: 14px; -fx-padding: 10 0;"/>
+                </VBox>
+            </Tab>
+
+        </TabPane>
+    </VBox>
+
+</StackPane>

@@ -88,52 +88,54 @@
                     </columnResizePolicy>
                 </TableView>
 
-                <!-- Panel detalle rediseñado -->
+                <!-- Panel detalle -->
                 <VBox fx:id="panelDetalle" styleClass="panel-detalle"
-                      spacing="6" prefWidth="260" maxWidth="260">
+                      spacing="4" prefWidth="260" maxWidth="260">
 
-                    <!-- Portada -->
                     <ImageView fx:id="imgPortadaMain"
-                               fitWidth="260" fitHeight="180"
+                               fitWidth="260" fitHeight="150"
                                preserveRatio="false" smooth="true"/>
 
-                    <!-- Título del juego -->
                     <Label fx:id="lblDetalleTitulo" styleClass="detail-title" text="—"
                            wrapText="true" maxWidth="240"/>
 
-                    <!-- Secciones tipo tarjeta -->
-                    <VBox styleClass="detail-section" spacing="4">
+                    <VBox styleClass="detail-section" spacing="3">
                         <Label text="DESARROLLADORA" styleClass="detail-section-header"/>
                         <Label fx:id="lblDetalleDesarrolladora" styleClass="detail-section-value" text="—" wrapText="true"/>
                         <Label text="AÑO" styleClass="detail-section-header"/>
                         <Label fx:id="lblDetalleAnio" styleClass="detail-section-value" text="—"/>
                     </VBox>
 
-                    <VBox styleClass="detail-section" spacing="4">
+                    <VBox styleClass="detail-section" spacing="3">
                         <Label text="PLATAFORMAS" styleClass="detail-section-header"/>
                         <Label fx:id="lblDetallePlataformas" styleClass="detail-section-value" text="—" wrapText="true"/>
                     </VBox>
 
-                    <VBox styleClass="detail-section" spacing="4">
+                    <VBox styleClass="detail-section" spacing="3">
                         <Label text="GÉNEROS" styleClass="detail-section-header"/>
                         <Label fx:id="lblDetalleGeneros" styleClass="detail-section-value" text="—" wrapText="true"/>
                     </VBox>
 
-                    <VBox styleClass="detail-section" spacing="4">
-                        <Label text="DESCRIPTION" styleClass="detail-section-header"/>
+                    <VBox styleClass="detail-section" spacing="3">
+                        <Label text="DESCRIPCIÓN" styleClass="detail-section-header"/>
                         <Label fx:id="lblDetalleDescripcion" styleClass="detail-section-value" text="—" wrapText="true"/>
                     </VBox>
 
                     <HBox styleClass="detail-section" spacing="10">
-                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <VBox spacing="3" HBox.hgrow="ALWAYS">
                             <Label text="RATING" styleClass="detail-section-header"/>
                             <Label fx:id="lblDetalleRatingEstrellas" styleClass="detail-section-value" text="—"/>
                         </VBox>
-                        <VBox spacing="4">
-                            <Label text="RATING" styleClass="detail-section-header"/>
+                        <VBox spacing="3">
+                            <Label text="PUNTUACIÓN" styleClass="detail-section-header"/>
                             <Label fx:id="lblDetalleRatingNum" styleClass="detail-section-value" text="—"/>
                         </VBox>
                     </HBox>
+
+                    <VBox styleClass="detail-section" spacing="3">
+                        <Label text="CREADO POR" styleClass="detail-section-header"/>
+                        <Label fx:id="lblDetalleCreadoPor" styleClass="detail-section-value" text="—" wrapText="true"/>
+                    </VBox>
 
                 </VBox>
             </HBox>
@@ -141,7 +143,8 @@
 
         <!-- BOTTOM -->
         <bottom>
-            <HBox spacing="15" alignment="CENTER_RIGHT" styleClass="footer-section">
+            <HBox spacing="15" alignment="CENTER_RIGHT" styleClass="footer-section"
+                  minHeight="60">
                 <padding><Insets top="10" right="30" bottom="20" left="30"/></padding>
                 <Button text="Añadir Juego" onAction="#abrirFormularioAlta" styleClass="btn-success"/>
                 <Button text="Eliminar Juego" onAction="#eliminarJuego" styleClass="btn-danger"/>

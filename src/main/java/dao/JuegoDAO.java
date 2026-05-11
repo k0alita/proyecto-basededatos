@@ -15,7 +15,7 @@ public class JuegoDAO {
 
         StringBuilder sql = new StringBuilder(
                 "SELECT j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada, " +
-                        "j.descripcion, j.rating, " +
+                        "j.descripcion, j.rating, j.creado_por, "+
                         "GROUP_CONCAT(DISTINCT p.nombre SEPARATOR ', ') AS plataformas_juego, " +
                         "GROUP_CONCAT(DISTINCT g.nombre SEPARATOR ', ') AS generos_juego " +
                         "FROM juegos j " +
@@ -68,7 +68,8 @@ public class JuegoDAO {
                             generos != null ? generos : "Sin género",
                             rs.getString("ruta_portada"),
                             rs.getString("descripcion") != null ? rs.getString("descripcion") : "",
-                            rs.getDouble("rating")
+                            rs.getDouble("rating"),
+                            rs.getString("creado_por")
                     ));
                 }
             }
@@ -79,7 +80,7 @@ public class JuegoDAO {
     }
 
     public boolean insertarJuegoConTransaccion(Juego juego, List<Integer> idsPlataformas, List<Integer> idsGeneros) {
-        String sqlJuego = "INSERT INTO juegos (titulo, desarrolladora, anio_lanzamiento, ruta_portada, descripcion, rating) VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlJuego = "INSERT INTO juegos (titulo, desarrolladora, anio_lanzamiento, ruta_portada, descripcion, rating, creado_por) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String sqlPlataforma = "INSERT INTO juegos_plataformas (id_juego, id_plataforma) VALUES (?, ?)";
         String sqlGenero = "INSERT INTO juegos_generos (id_juego, id_genero) VALUES (?, ?)";
 
@@ -96,6 +97,7 @@ public class JuegoDAO {
                 ps.setString(4, juego.getRutaPortada());
                 ps.setString(5, juego.getDescripcion());
                 ps.setDouble(6, juego.getRating());
+                ps.setString(7, juego.getCreadoPor());
                 ps.executeUpdate();
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (!rs.next()) throw new SQLException("No se obtuvo el ID generado.");
