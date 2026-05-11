@@ -22,7 +22,7 @@ public class Main extends Application {
             System.err.println("No se pudo cargar el icono: " + e.getMessage());
         }
 
-        Scene scene = new Scene(root, 460, 630);
+        Scene scene = new Scene(root, 460, 630 );
         scene.setFill(Color.TRANSPARENT);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
         primaryStage.setScene(scene);

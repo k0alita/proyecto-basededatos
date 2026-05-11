@@ -266,7 +266,12 @@ public class MainController implements Initializable {
     }
 
     private Image getImagenPorDefecto() {
-        return new Image(getClass().getResourceAsStream("/portadas/sin_portada.jpg"));
+        try {
+            var stream = getClass().getResourceAsStream("/portadas/sin_portada.jpg");
+            if (stream != null) return new Image(stream);
+        } catch (Exception ignored) {}
+        // Si no hay recurso, devuelve imagen vacía sin romper la app
+        return new Image("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==");
     }
 
     private Image getImagenConCache(String ruta) {

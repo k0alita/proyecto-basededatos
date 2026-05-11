@@ -15,7 +15,7 @@ public class JuegoDAO {
 
         StringBuilder sql = new StringBuilder(
                 "SELECT j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada, " +
-                        "j.descripcion, j.rating, j.creado_por, "+
+                        "j.descripcion, j.rating, j.creado_por, " +
                         "GROUP_CONCAT(DISTINCT p.nombre SEPARATOR ', ') AS plataformas_juego, " +
                         "GROUP_CONCAT(DISTINCT g.nombre SEPARATOR ', ') AS generos_juego " +
                         "FROM juegos j " +
@@ -40,7 +40,8 @@ public class JuegoDAO {
                     "WHERE g2.nombre = ?) ");
         }
 
-        sql.append("GROUP BY j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, j.ruta_portada, j.descripcion, j.rating");
+        sql.append("GROUP BY j.id_juego, j.titulo, j.desarrolladora, j.anio_lanzamiento, " +
+                "j.ruta_portada, j.descripcion, j.rating, j.creado_por");
 
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -59,6 +60,7 @@ public class JuegoDAO {
                 while (rs.next()) {
                     String plataformas = rs.getString("plataformas_juego");
                     String generos = rs.getString("generos_juego");
+
                     lista.add(new Juego(
                             rs.getInt("id_juego"),
                             rs.getString("titulo"),
@@ -73,9 +75,11 @@ public class JuegoDAO {
                     ));
                 }
             }
+
         } catch (SQLException e) {
             System.err.println("Error al buscar juegos: " + e.getMessage());
         }
+
         return lista;
     }
 
@@ -85,11 +89,18 @@ public class JuegoDAO {
         String sqlGenero = "INSERT INTO juegos_generos (id_juego, id_genero) VALUES (?, ?)";
 
         Connection conn = null;
+
         try {
             conn = ConexionDB.getConnection();
             conn.setAutoCommit(false);
 
+            if (idsPlataformas == null || idsGeneros == null || idsPlataformas.isEmpty() || idsGeneros.isEmpty()) {
+                conn.rollback();
+                return false;
+            }
+
             int idJuego;
+
             try (PreparedStatement ps = conn.prepareStatement(sqlJuego, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, juego.getTitulo());
                 ps.setString(2, juego.getDesarrolladora());
@@ -98,9 +109,13 @@ public class JuegoDAO {
                 ps.setString(5, juego.getDescripcion());
                 ps.setDouble(6, juego.getRating());
                 ps.setString(7, juego.getCreadoPor());
+
                 ps.executeUpdate();
+
                 try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (!rs.next()) throw new SQLException("No se obtuvo el ID generado.");
+                    if (!rs.next()) {
+                        throw new SQLException("No se obtuvo el ID generado.");
+                    }
                     idJuego = rs.getInt(1);
                 }
             }
@@ -127,11 +142,25 @@ public class JuegoDAO {
             return true;
 
         } catch (SQLException e) {
-            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             e.printStackTrace();
             return false;
+
         } finally {
-            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -143,6 +172,7 @@ public class JuegoDAO {
         String sqlInsertGen = "INSERT INTO juegos_generos (id_juego, id_genero) VALUES (?, ?)";
 
         Connection conn = null;
+
         try {
             conn = ConexionDB.getConnection();
             conn.setAutoCommit(false);
@@ -159,18 +189,35 @@ public class JuegoDAO {
             }
 
             try (PreparedStatement ps = conn.prepareStatement(sqlDeletePlat)) {
-                ps.setInt(1, juego.getId()); ps.executeUpdate();
+                ps.setInt(1, juego.getId());
+                ps.executeUpdate();
             }
+
             try (PreparedStatement ps = conn.prepareStatement(sqlDeleteGen)) {
-                ps.setInt(1, juego.getId()); ps.executeUpdate();
+                ps.setInt(1, juego.getId());
+                ps.executeUpdate();
+            }
+
+            if (idsPlataformas == null || idsGeneros == null || idsPlataformas.isEmpty() || idsGeneros.isEmpty()) {
+                conn.rollback();
+                return false;
             }
 
             try (PreparedStatement ps = conn.prepareStatement(sqlInsertPlat)) {
-                for (int id : idsPlataformas) { ps.setInt(1, juego.getId()); ps.setInt(2, id); ps.addBatch(); }
+                for (int id : idsPlataformas) {
+                    ps.setInt(1, juego.getId());
+                    ps.setInt(2, id);
+                    ps.addBatch();
+                }
                 ps.executeBatch();
             }
+
             try (PreparedStatement ps = conn.prepareStatement(sqlInsertGen)) {
-                for (int id : idsGeneros) { ps.setInt(1, juego.getId()); ps.setInt(2, id); ps.addBatch(); }
+                for (int id : idsGeneros) {
+                    ps.setInt(1, juego.getId());
+                    ps.setInt(2, id);
+                    ps.addBatch();
+                }
                 ps.executeBatch();
             }
 
@@ -178,11 +225,25 @@ public class JuegoDAO {
             return true;
 
         } catch (SQLException e) {
-            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             e.printStackTrace();
             return false;
+
         } finally {
-            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -191,7 +252,9 @@ public class JuegoDAO {
              PreparedStatement ps = conn.prepareStatement("DELETE FROM juegos WHERE id_juego=?")) {
             ps.setInt(1, idJuego);
             ps.executeUpdate();
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public List<Integer> obtenerIdsPlataformasDeJuego(int idJuego) {
@@ -204,33 +267,57 @@ public class JuegoDAO {
 
     private List<Integer> obtenerIds(String sql, int idJuego) {
         List<Integer> ids = new ArrayList<>();
+
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idJuego);
+
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) ids.add(rs.getInt(1));
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return ids;
     }
 
     public List<Plataforma> obtenerPlataformas() {
         List<Plataforma> lista = new ArrayList<>();
+
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement("SELECT id_plataforma, nombre, fabricante FROM plataformas");
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) lista.add(new Plataforma(rs.getInt(1), rs.getString(2), rs.getString(3)));
-        } catch (SQLException e) { e.printStackTrace(); }
+
+            while (rs.next()) {
+                lista.add(new Plataforma(rs.getInt(1), rs.getString(2), rs.getString(3)));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return lista;
     }
 
     public List<Genero> obtenerGeneros() {
         List<Genero> lista = new ArrayList<>();
+
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement("SELECT id_genero, nombre FROM generos");
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) lista.add(new Genero(rs.getInt(1), rs.getString(2)));
-        } catch (SQLException e) { e.printStackTrace(); }
+
+            while (rs.next()) {
+                lista.add(new Genero(rs.getInt(1), rs.getString(2)));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return lista;
     }
 }
