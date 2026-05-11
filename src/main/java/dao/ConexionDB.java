@@ -1,34 +1,38 @@
 package dao;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
 public class ConexionDB {
-    private static final Properties properties = new Properties();
 
-    // Este bloque static se ejecuta una sola vez al arrancar la app
+    private static final HikariDataSource dataSource;
+
     static {
-        try (InputStream input = ConexionDB.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (input == null) {
-                System.err.println("Error: No se encontró el archivo config.properties en resources.");
-            } else {
-                properties.load(input);
-            }
-            Class.forName("org.mariadb.jdbc.Driver");
+        Properties props = new Properties();
+        try (InputStream input = ConexionDB.class.getClassLoader()
+                .getResourceAsStream("config.properties")) {
+            if (input == null) throw new RuntimeException("No se encontró config.properties");
+            props.load(input);
         } catch (Exception e) {
-            System.err.println("Error al cargar la configuración de la base de datos.");
-            e.printStackTrace();
+            throw new RuntimeException("Error al cargar config.properties", e);
         }
+
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(props.getProperty("db.url"));
+        config.setUsername(props.getProperty("db.user"));
+        config.setPassword(props.getProperty("db.password"));
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(2);
+        config.setConnectionTimeout(3000);
+        dataSource = new HikariDataSource(config);
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(
-                properties.getProperty("db.url"),
-                properties.getProperty("db.user"),
-                properties.getProperty("db.password")
-        );
+        return dataSource.getConnection();
     }
 }

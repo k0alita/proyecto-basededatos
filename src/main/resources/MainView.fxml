@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
@@ -11,113 +12,144 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
 
-<BorderPane stylesheets="@style.css" styleClass="root-pane"
-            xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.MainController">
+<StackPane stylesheets="@style.css"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controllers.MainController">
 
-    <!-- TOP: Título + buscador -->
-    <top>
-        <VBox spacing="10" styleClass="header-section">
-            <padding>
-                <Insets top="0" right="0" bottom="15" left="0"/>
-            </padding>
+    <!-- FONDO -->
+    <ImageView fitWidth="1400" fitHeight="900"
+               preserveRatio="false" smooth="true"
+               mouseTransparent="true">
+        <image>
+            <Image url="@portadas/fondo.jpg"/>
+        </image>
+    </ImageView>
 
-            <!-- Barra de título personalizada -->
-            <HBox spacing="10"
-                  alignment="CENTER"
-                  styleClass="title-bar"
-                  onMousePressed="#onTitleBarPressed"
-                  onMouseDragged="#onTitleBarDragged">
-                <padding>
-                    <Insets top="6" right="12" bottom="6" left="12"/>
-                </padding>
+    <!-- Capa oscura -->
+    <Region style="-fx-background-color: rgba(0,0,0,0.50);"
+            mouseTransparent="true"/>
 
-                <!-- Espaciador izquierda -->
-                <Region prefWidth="10"/>
+    <!-- Contenido principal -->
+    <BorderPane styleClass="root-pane">
 
-                <!-- Título centrado -->
-                <Label text="RobloxGames - Gestor de Videojuegos de Roblox"
-                       styleClass="title-label"/>
+        <!-- TOP -->
+        <top>
+            <VBox spacing="10" styleClass="header-section">
+                <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
 
-                <!-- Espaciador flexible + botones derecha -->
-                <HBox spacing="6" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="—" onAction="#minimizarVentana" styleClass="btn-titlebar"/>
-                    <Button text="✕" onAction="#cerrarVentana" styleClass="btn-titlebar-cerrar"/>
+                <HBox spacing="10" alignment="CENTER" styleClass="title-bar"
+                      onMousePressed="#onTitleBarPressed"
+                      onMouseDragged="#onTitleBarDragged">
+                    <padding><Insets top="6" right="12" bottom="6" left="12"/></padding>
+                    <Region prefWidth="10"/>
+                    <Label text="RobloxGames - Gestor de Videojuegos de Roblox" styleClass="title-label"/>
+                    <HBox spacing="6" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="—" onAction="#minimizarVentana" styleClass="btn-titlebar"/>
+                        <Button text="✕" onAction="#cerrarVentana" styleClass="btn-titlebar-cerrar"/>
+                    </HBox>
                 </HBox>
-            </HBox>
 
-            <!-- Buscador y botón Editar -->
-            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="header-section-inner">
-                <padding>
-                    <Insets top="10" right="20" bottom="10" left="20"/>
-                </padding>
-
-                <Label text="Buscar:" styleClass="text-label"/>
-                <TextField fx:id="txtBuscarTitulo" promptText="Título del juego..." prefWidth="240"/>
-                <ComboBox fx:id="comboBuscarPlataforma" promptText="Plataforma..." prefWidth="180"/>
-
-                <!-- Botón Editar al lado de los campos de búsqueda -->
-                <Button text="Editar Juego" onAction="#abrirFormularioEdicion" styleClass="btn-primary"/>
-
-                <!-- Region expansible para empujar contenido si lo hubiera a la derecha -->
-                <Region HBox.hgrow="ALWAYS"/>
-            </HBox>
-        </VBox>
-    </top>
-
-    <!-- CENTER: Tabla + ficha -->
-    <center>
-        <HBox spacing="20">
-            <padding>
-                <Insets top="0" right="30" bottom="10" left="30"/>
-            </padding>
-
-            <!-- Tabla de juegos (ocupa la mayor parte del ancho) -->
-            <TableView fx:id="tablaJuegos" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="45"/>
-                    <TableColumn fx:id="colPortada" text="Portada" prefWidth="60"/>
-                    <TableColumn fx:id="colTitulo" text="Título" prefWidth="360"/>
-                    <TableColumn fx:id="colDesarrolladora" text="Desarrolladora" prefWidth="260"/>
-                    <TableColumn fx:id="colAnio" text="Año" prefWidth="70"/>
-                </columns>
-                <columnResizePolicy>
-                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                </columnResizePolicy>
-            </TableView>
-
-            <!-- Ficha del juego seleccionado -->
-            <VBox fx:id="panelDetalle" spacing="10" prefWidth="260" maxWidth="260">
-                <Label text="Detalles del juego" styleClass="text-label"/>
-
-                <ImageView fx:id="imgPortadaMain"
-                           fitWidth="220"
-                           fitHeight="300"
-                           preserveRatio="true"
-                           smooth="true"/>
-
-                <Label fx:id="lblDetalleTitulo" styleClass="text-label" text="Título: -"/>
-                <Label fx:id="lblDetalleDesarrolladora" styleClass="text-label" text="Desarrolladora: -"/>
-                <Label fx:id="lblDetalleAnio" styleClass="text-label" text="Año: -"/>
-                <Label fx:id="lblDetallePlataformas" styleClass="text-label" text="Plataformas: -"/>
-                <Label fx:id="lblDetalleGeneros" styleClass="text-label" text="Géneros: -"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="header-section-inner">
+                    <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
+                    <Label text="Buscar:" styleClass="text-label"/>
+                    <TextField fx:id="txtBuscarTitulo" promptText="Título del juego..." prefWidth="240"/>
+                    <ComboBox fx:id="comboBuscarPlataforma" promptText="Plataforma..." prefWidth="160"/>
+                    <ComboBox fx:id="comboBuscarGenero" promptText="Género..." prefWidth="140"/>
+                    <Button text="↻" onAction="#refrescarTabla" styleClass="btn-refresh" minWidth="36" minHeight="36"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Editar Juego" onAction="#abrirFormularioEdicion" styleClass="btn-primary"/>
+                </HBox>
             </VBox>
-        </HBox>
-    </center>
+        </top>
 
-    <!-- BOTTOM: Botones de Acción (Añadir y Eliminar) -->
-    <bottom>
-        <HBox spacing="15" alignment="CENTER_RIGHT" styleClass="footer-section">
-            <padding>
-                <Insets top="10" right="30" bottom="20" left="30"/>
-            </padding>
-            <Button text="Añadir Juego" onAction="#abrirFormularioAlta" styleClass="btn-success"/>
-            <Button text="Eliminar Juego" onAction="#eliminarJuego" styleClass="btn-danger"/>
-        </HBox>
-    </bottom>
+        <!-- CENTER -->
+        <center>
+            <HBox spacing="20">
+                <padding><Insets top="10" right="30" bottom="10" left="30"/></padding>
 
-</BorderPane>
+                <!-- Tabla -->
+                <TableView fx:id="tablaJuegos" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colId" text="ID" prefWidth="45"/>
+                        <TableColumn fx:id="colPortada" text="" prefWidth="72"/>
+                        <TableColumn fx:id="colTitulo" text="Título" prefWidth="360"/>
+                        <TableColumn fx:id="colDesarrolladora" text="Desarrolladora" prefWidth="260"/>
+                        <TableColumn fx:id="colAnio" text="Año" prefWidth="70"/>
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                    </columnResizePolicy>
+                </TableView>
+
+                <!-- Panel detalle -->
+                <VBox fx:id="panelDetalle" styleClass="panel-detalle"
+                      spacing="4" prefWidth="260" maxWidth="260">
+
+                    <ImageView fx:id="imgPortadaMain"
+                               fitWidth="260" fitHeight="150"
+                               preserveRatio="false" smooth="true"/>
+
+                    <Label fx:id="lblDetalleTitulo" styleClass="detail-title" text="—"
+                           wrapText="true" maxWidth="240"/>
+
+                    <VBox styleClass="detail-section" spacing="3">
+                        <Label text="DESARROLLADORA" styleClass="detail-section-header"/>
+                        <Label fx:id="lblDetalleDesarrolladora" styleClass="detail-section-value" text="—" wrapText="true"/>
+                        <Label text="AÑO" styleClass="detail-section-header"/>
+                        <Label fx:id="lblDetalleAnio" styleClass="detail-section-value" text="—"/>
+                    </VBox>
+
+                    <VBox styleClass="detail-section" spacing="3">
+                        <Label text="PLATAFORMAS" styleClass="detail-section-header"/>
+                        <Label fx:id="lblDetallePlataformas" styleClass="detail-section-value" text="—" wrapText="true"/>
+                    </VBox>
+
+                    <VBox styleClass="detail-section" spacing="3">
+                        <Label text="GÉNEROS" styleClass="detail-section-header"/>
+                        <Label fx:id="lblDetalleGeneros" styleClass="detail-section-value" text="—" wrapText="true"/>
+                    </VBox>
+
+                    <VBox styleClass="detail-section" spacing="3">
+                        <Label text="DESCRIPCIÓN" styleClass="detail-section-header"/>
+                        <Label fx:id="lblDetalleDescripcion" styleClass="detail-section-value" text="—" wrapText="true"/>
+                    </VBox>
+
+                    <HBox styleClass="detail-section" spacing="10">
+                        <VBox spacing="3" HBox.hgrow="ALWAYS">
+                            <Label text="RATING" styleClass="detail-section-header"/>
+                            <Label fx:id="lblDetalleRatingEstrellas" styleClass="detail-section-value" text="—"/>
+                        </VBox>
+                        <VBox spacing="3">
+                            <Label text="PUNTUACIÓN" styleClass="detail-section-header"/>
+                            <Label fx:id="lblDetalleRatingNum" styleClass="detail-section-value" text="—"/>
+                        </VBox>
+                    </HBox>
+
+                    <VBox styleClass="detail-section" spacing="3">
+                        <Label text="CREADO POR" styleClass="detail-section-header"/>
+                        <Label fx:id="lblDetalleCreadoPor" styleClass="detail-section-value" text="—" wrapText="true"/>
+                    </VBox>
+
+                </VBox>
+            </HBox>
+        </center>
+
+        <!-- BOTTOM -->
+        <bottom>
+            <HBox spacing="15" alignment="CENTER_RIGHT" styleClass="footer-section"
+                  minHeight="60">
+                <padding><Insets top="10" right="30" bottom="20" left="30"/></padding>
+                <Button text="Añadir Juego" onAction="#abrirFormularioAlta" styleClass="btn-success"/>
+                <Button text="Eliminar Juego" onAction="#eliminarJuego" styleClass="btn-danger"/>
+            </HBox>
+        </bottom>
+
+    </BorderPane>
+</StackPane>

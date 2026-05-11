@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import models.Juego;
 import models.Genero;
 import models.Plataforma;
+import models.Usuario;
 import utils.ImgBBUploader;
 import java.io.File;
 import java.net.URL;
@@ -22,29 +23,32 @@ public class FormController implements Initializable {
     @FXML private TextField txtTitulo;
     @FXML private TextField txtDesarrolladora;
     @FXML private TextField txtAnio;
-    // Ahora usan Objetos Reales, no Strings
+    @FXML private TextArea txtDescripcion;
+    @FXML private TextField txtRating;
     @FXML private ListView<Plataforma> listPlataformas;
     @FXML private ListView<Genero> listGeneros;
-
     @FXML private Button btnGuardar;
     @FXML private Label lblRutaImagen;
     @FXML private ImageView imgPortadaPreview;
 
     private JuegoDAO juegoDAO = new JuegoDAO();
     private String rutaPortadaSeleccionada = null;
-
     private boolean modoEdicion = false;
     private Juego juegoEditando = null;
 
+
+    private Usuario usuarioActual;
+
+    public void setUsuarioActual(Usuario usuario) {
+        this.usuarioActual = usuario;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // 1. CARGA DINÁMICA DESDE BASE DE DATOS
         listPlataformas.getItems().addAll(juegoDAO.obtenerPlataformas());
         listGeneros.getItems().addAll(juegoDAO.obtenerGeneros());
-
         listPlataformas.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listGeneros.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
         Image defaultImg = new Image(getClass().getResourceAsStream("/portadas/sin_portada.jpg"));
         imgPortadaPreview.setImage(defaultImg);
     }
@@ -57,36 +61,38 @@ public class FormController implements Initializable {
         txtTitulo.setText(juego.getTitulo());
         txtDesarrolladora.setText(juego.getDesarrolladora());
         txtAnio.setText(String.valueOf(juego.getAnioLanzamiento()));
+        txtDescripcion.setText(juego.getDescripcion() != null ? juego.getDescripcion() : "");
+        txtRating.setText(juego.getRating() > 0 ? String.valueOf(juego.getRating()) : "");
 
         rutaPortadaSeleccionada = juego.getRutaPortada();
         if (rutaPortadaSeleccionada != null && !rutaPortadaSeleccionada.isBlank()) {
-            File archivo = new File(rutaPortadaSeleccionada);
-            if (archivo.exists()) {
-                imgPortadaPreview.setImage(new Image(archivo.toURI().toString()));
-                lblRutaImagen.setText(archivo.getName());
+            if (rutaPortadaSeleccionada.startsWith("http")) {
+                imgPortadaPreview.setImage(new Image(rutaPortadaSeleccionada, true));
+                lblRutaImagen.setText("Imagen en la nube ☁️");
+            } else {
+                File archivo = new File(rutaPortadaSeleccionada);
+                if (archivo.exists()) {
+                    imgPortadaPreview.setImage(new Image(archivo.toURI().toString()));
+                    lblRutaImagen.setText(archivo.getName());
+                }
             }
         }
 
-        // Marcar plataformas que ya tenía el juego
         listPlataformas.getSelectionModel().clearSelection();
         List<Integer> platIds = juegoDAO.obtenerIdsPlataformasDeJuego(juego.getId());
         for (int i = 0; i < listPlataformas.getItems().size(); i++) {
-            if (platIds.contains(listPlataformas.getItems().get(i).getId())) {
+            if (platIds.contains(listPlataformas.getItems().get(i).getId()))
                 listPlataformas.getSelectionModel().select(i);
-            }
         }
 
-        // Marcar géneros que ya tenía el juego
         listGeneros.getSelectionModel().clearSelection();
         List<Integer> genIds = juegoDAO.obtenerIdsGenerosDeJuego(juego.getId());
         for (int i = 0; i < listGeneros.getItems().size(); i++) {
-            if (genIds.contains(listGeneros.getItems().get(i).getId())) {
+            if (genIds.contains(listGeneros.getItems().get(i).getId()))
                 listGeneros.getSelectionModel().select(i);
-            }
         }
     }
 
-    // Añade esta variable arriba con las demás
     private File archivoFisicoSeleccionado = null;
 
     @FXML
@@ -96,12 +102,9 @@ public class FormController implements Initializable {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Imágenes PNG y JPG", "*.png", "*.jpg", "*.jpeg")
         );
-
         Stage stage = (Stage) btnGuardar.getScene().getWindow();
         archivoFisicoSeleccionado = fileChooser.showOpenDialog(stage);
-
         if (archivoFisicoSeleccionado != null) {
-            // Solo mostramos la miniatura localmente, aún no la hemos subido
             lblRutaImagen.setText(archivoFisicoSeleccionado.getName());
             imgPortadaPreview.setImage(new Image(archivoFisicoSeleccionado.toURI().toString()));
         }
@@ -110,62 +113,119 @@ public class FormController implements Initializable {
     @FXML
     private void guardar() {
         try {
-            if (txtTitulo.getText().isEmpty() || listPlataformas.getSelectionModel().getSelectedItems().isEmpty()
+            if (txtTitulo.getText().isEmpty()
+                    || listPlataformas.getSelectionModel().getSelectedItems().isEmpty()
                     || listGeneros.getSelectionModel().getSelectedItems().isEmpty()) {
                 mostrarAlerta("Error", "Debe tener título, al menos una plataforma y un género.");
                 return;
             }
 
-            // Cambiamos el texto del botón para que el usuario sepa que está cargando
-            btnGuardar.setText("Subiendo...");
-            btnGuardar.setDisable(true);
-
-            // Si hay un archivo nuevo seleccionado, lo subimos a internet!
-            if (archivoFisicoSeleccionado != null) {
+            double rating = 0.0;
+            if (!txtRating.getText().isEmpty()) {
                 try {
-                    String urlNube = ImgBBUploader.subirImagen(archivoFisicoSeleccionado);
-                    if (urlNube != null) {
-                        rutaPortadaSeleccionada = urlNube; // EJ: https://i.ibb.co/123/slime.png
+                    rating = Double.parseDouble(txtRating.getText().replace(",", "."));
+                    if (rating < 0 || rating > 5) {
+                        mostrarAlerta("Error", "El rating debe estar entre 0 y 5.");
+                        return;
                     }
-                } catch (Exception e) {
-                    mostrarAlerta("Error", "No se pudo subir la imagen a internet.");
-                    btnGuardar.setText("Guardar");
-                    btnGuardar.setDisable(false);
+                } catch (NumberFormatException e) {
+                    mostrarAlerta("Error", "El rating debe ser un número (ej: 4.5).");
                     return;
                 }
             }
 
-            String titulo = txtTitulo.getText();
-            String desarrolladora = txtDesarrolladora.getText();
-            int anio = txtAnio.getText().isEmpty() ? 0 : Integer.parseInt(txtAnio.getText());
-
-            List<Integer> idsPlataformas = new ArrayList<>();
-            for (Plataforma p : listPlataformas.getSelectionModel().getSelectedItems()) idsPlataformas.add(p.getId());
-
-            List<Integer> idsGeneros = new ArrayList<>();
-            for (Genero g : listGeneros.getSelectionModel().getSelectedItems()) idsGeneros.add(g.getId());
-
-            boolean exito;
-            if (modoEdicion) {
-                juegoEditando.setTitulo(titulo);
-                juegoEditando.setDesarrolladora(desarrolladora);
-                juegoEditando.setAnioLanzamiento(anio);
-                juegoEditando.setRutaPortada(rutaPortadaSeleccionada);
-                exito = juegoDAO.actualizarJuegoConTransaccion(juegoEditando, idsPlataformas, idsGeneros);
-            } else {
-                Juego nuevoJuego = new Juego(0, titulo, desarrolladora, anio, "", "", rutaPortadaSeleccionada);
-                exito = juegoDAO.insertarJuegoConTransaccion(nuevoJuego, idsPlataformas, idsGeneros);
+            // Validación año
+            int anio = 0;
+            if (!txtAnio.getText().isEmpty()) {
+                try {
+                    anio = Integer.parseInt(txtAnio.getText());
+                    if (anio < 1970 || anio > 2100) {
+                        mostrarAlerta("Error", "El año debe estar entre 1970 y 2100.");
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    mostrarAlerta("Error", "El año debe ser un número válido.");
+                    return;
+                }
             }
 
-            if (exito) cerrarVentana();
-            else mostrarAlerta("Error SQL", "Ocurrió un problema en la base de datos.");
+            // Capturamos los valores finales para usar dentro del Task (deben ser efectivamente finales)
+            final double ratingFinal = rating;
+            final int anioFinal = anio;
+            final String titulo = txtTitulo.getText();
+            final String desarrolladora = txtDesarrolladora.getText();
+            final String descripcion = txtDescripcion.getText();
+            final List<Integer> idsPlataformas = new ArrayList<>();
+            for (Plataforma p : listPlataformas.getSelectionModel().getSelectedItems()) idsPlataformas.add(p.getId());
+            final List<Integer> idsGeneros = new ArrayList<>();
+            for (Genero g : listGeneros.getSelectionModel().getSelectedItems()) idsGeneros.add(g.getId());
+
+            btnGuardar.setText("Subiendo...");
+            btnGuardar.setDisable(true);
+
+            if (archivoFisicoSeleccionado != null) {
+                // Subir imagen en hilo secundario para no bloquear la UI
+                javafx.concurrent.Task<String> subirTask = new javafx.concurrent.Task<>() {
+                    @Override
+                    protected String call() throws Exception {
+                        return ImgBBUploader.subirImagen(archivoFisicoSeleccionado);
+                    }
+                };
+
+                subirTask.setOnSucceeded(e -> {
+                    String urlNube = subirTask.getValue();
+                    if (urlNube != null) rutaPortadaSeleccionada = urlNube;
+                    ejecutarGuardado(titulo, desarrolladora, anioFinal, descripcion, ratingFinal, idsPlataformas, idsGeneros);
+                });
+
+                subirTask.setOnFailed(e -> {
+                    mostrarAlerta("Error", "No se pudo subir la imagen a internet.");
+                    btnGuardar.setText(modoEdicion ? "Guardar cambios" : "Guardar");
+                    btnGuardar.setDisable(false);
+                });
+
+                new Thread(subirTask).start();
+
+            } else {
+                // Sin imagen nueva, guardar directamente
+                ejecutarGuardado(titulo, desarrolladora, anioFinal, descripcion, ratingFinal, idsPlataformas, idsGeneros);
+            }
 
         } catch (NumberFormatException e) {
             mostrarAlerta("Error", "El año debe ser un número válido.");
-            btnGuardar.setText("Guardar");
+            btnGuardar.setText(modoEdicion ? "Guardar cambios" : "Guardar");
             btnGuardar.setDisable(false);
         }
     }
+
+    // Método auxiliar que ejecuta el INSERT/UPDATE ya en el hilo de JavaFX (setOnSucceeded ya lo garantiza)
+    private void ejecutarGuardado(String titulo, String desarrolladora, int anio,
+                                  String descripcion, double rating,
+                                  List<Integer> idsPlataformas, List<Integer> idsGeneros) {
+        boolean exito;
+        if (modoEdicion) {
+            juegoEditando.setTitulo(titulo);
+            juegoEditando.setDesarrolladora(desarrolladora);
+            juegoEditando.setAnioLanzamiento(anio);
+            juegoEditando.setRutaPortada(rutaPortadaSeleccionada);
+            juegoEditando.setDescripcion(descripcion);
+            juegoEditando.setRating(rating);
+            exito = juegoDAO.actualizarJuegoConTransaccion(juegoEditando, idsPlataformas, idsGeneros);
+        } else {
+            Juego nuevoJuego = new Juego(0, titulo, desarrolladora, anio, "", "",
+                    rutaPortadaSeleccionada, descripcion, rating,
+                    usuarioActual != null ? usuarioActual.getUsername() : "desconocido");
+            exito = juegoDAO.insertarJuegoConTransaccion(nuevoJuego, idsPlataformas, idsGeneros);
+        }
+
+        if (exito) cerrarVentana();
+        else {
+            mostrarAlerta("Error SQL", "Ocurrió un problema en la base de datos.");
+            btnGuardar.setText(modoEdicion ? "Guardar cambios" : "Guardar");
+            btnGuardar.setDisable(false);
+        }
+    }
+
     @FXML private void cancelar() { cerrarVentana(); }
     private void cerrarVentana() { ((Stage) btnGuardar.getScene().getWindow()).close(); }
 
@@ -178,4 +238,5 @@ public class FormController implements Initializable {
         alert.getDialogPane().getStyleClass().add("custom-alert");
         alert.showAndWait();
     }
+
 }
